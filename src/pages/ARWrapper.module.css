@@ -1,0 +1,72 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.backButton {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(20px, env(safe-area-inset-left));
+  z-index: 9999;
+  
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  background: rgba(10, 10, 15, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  
+  cursor: pointer;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.backIcon {
+  font-size: 16px;
+  transition: transform 0.25s ease;
+}
+
+.backButton:hover {
+  background: rgba(124, 109, 250, 0.2);
+  border-color: rgba(124, 109, 250, 0.4);
+  box-shadow: 0 0 15px var(--accent-glow), 0 4px 20px rgba(0, 0, 0, 0.4);
+  color: var(--accent-2);
+}
+
+.backButton:hover .backIcon {
+  transform: translateX(-3px);
+}
+
+.backButton:active {
+  transform: scale(0.96);
+  background: rgba(124, 109, 250, 0.3);
+}
+
+/* Make sure the floating back button adapts perfectly for smaller mobile devices */
+@media (max-width: 480px) {
+  .backButton {
+    padding: 8px 14px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .backIcon {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "targetImageUrl": "/Tiffin.jpg",
+    "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+    "cardTitle": "Eurobliz AR Demo",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://www.eurobliz.eu"
+  },
+  {
+    "targetImageUrl": "/1.png",
+    "youtubeUrl": "https://youtube.com/shorts/j67uvRFzGOk?feature=share",
+    "cardTitle": "Le P'tit Quinquin",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/O192jrR80oo?si=jst7iColY0d_MenX"
+  },
+  {
+    "targetImageUrl": "/2.png",
+    "youtubeUrl": "https://youtube.com/shorts/K03Anklea_o?feature=share",
+    "cardTitle": "Alphonse & Zulma",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/fZKrUgm9R1o?si=FJeLalRaQveATbxb"
+  },
+  {
+    "targetImageUrl": "/3.png",
+    "youtubeUrl": "https://youtube.com/shorts/QDZlnmsxwiU?feature=share",
+    "cardTitle": "Les gens du Nord",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/Ey25vULQ6YM?si=86mBzyZCUXjhaXQt"
+  }
+]
