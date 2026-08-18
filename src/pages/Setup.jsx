@@ -12,10 +12,10 @@ function arrayBufferToBase64(buffer) {
 
 const DEFAULTS = {
   videoUrl: 'https://www.w3schools.com/Html/mov_bbb.mp4',
-  cardTitle: 'Check us out!',
-  cardBody: 'Scan this image to explore our world.',
-  buttonLabel: 'Visit Website',
-  buttonUrl: 'https://www.eurobliz.eu',
+  cardTitle: 'LilCo STEM Experience',
+  cardBody: 'Scan this image to explore interactive LilCo STEM learning resources.',
+  buttonLabel: 'Explore LilCo Platform',
+  buttonUrl: 'https://lilco.eu',
 }
 
 const SESSION_KEY = 'ar_setup_draft'
@@ -140,10 +140,10 @@ export default function Setup() {
 
       <header className={styles.header}>
         <div className={styles.logo}>
-          <span className={styles.logoMark}>◈</span>
-          <span className={styles.logoText}>AR Studio</span>
+          <span className={styles.logoBadge}>LILCO</span>
+          <span className={styles.logoText}>STEM AR Studio</span>
         </div>
-        <div className={styles.badge}>Beta</div>
+        <div className={styles.badge}>Creator Portal</div>
       </header>
 
       <main className={styles.main}>

@@ -157,17 +157,18 @@
   height: 24px;
 }
 
-.scanCorner[data-pos="tl"] { top: 0; left: 0; border-top: 2.5px solid white; border-left: 2.5px solid white; border-radius: 3px 0 0 0; }
-.scanCorner[data-pos="tr"] { top: 0; right: 0; border-top: 2.5px solid white; border-right: 2.5px solid white; border-radius: 0 3px 0 0; }
-.scanCorner[data-pos="bl"] { bottom: 0; left: 0; border-bottom: 2.5px solid white; border-left: 2.5px solid white; border-radius: 0 0 0 3px; }
-.scanCorner[data-pos="br"] { bottom: 0; right: 0; border-bottom: 2.5px solid white; border-right: 2.5px solid white; border-radius: 0 0 3px 0; }
+.scanCorner[data-pos="tl"] { top: 0; left: 0; border-top: 2.5px solid var(--accent); border-left: 2.5px solid var(--accent); border-radius: 3px 0 0 0; }
+.scanCorner[data-pos="tr"] { top: 0; right: 0; border-top: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); border-radius: 0 3px 0 0; }
+.scanCorner[data-pos="bl"] { bottom: 0; left: 0; border-bottom: 2.5px solid var(--accent); border-left: 2.5px solid var(--accent); border-radius: 0 0 0 3px; }
+.scanCorner[data-pos="br"] { bottom: 0; right: 0; border-bottom: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); border-radius: 0 0 3px 0; }
 
 .scanLine {
   position: absolute;
   left: 4px;
   right: 4px;
-  height: 1.5px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 10px var(--accent-glow);
   animation: scanline 2.5s ease-in-out infinite;
   top: 0;
 }

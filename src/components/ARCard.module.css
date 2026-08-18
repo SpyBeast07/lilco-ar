@@ -1,69 +1,75 @@
 .cardWrap {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 440px;
   z-index: 9999;
-  padding: 0 16px 32px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
+  pointer-events: auto;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .visible {
-  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  pointer-events: all;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .hidden {
-  animation: slideDown 0.3s ease both;
+  opacity: 0;
+  transform: translateX(-50%) translateY(24px);
+  pointer-events: none;
 }
 
 .card {
-  pointer-events: auto;
-  background: rgba(16, 16, 24, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 20px 20px 20px;
-  max-width: 420px;
-  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18), 0 0 25px var(--accent-glow);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 -4px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  align-items: center;
+  text-align: center;
+  position: relative;
 }
 
 .pill {
   width: 36px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 2px;
-  margin: 0 auto 4px;
+  margin-bottom: 14px;
 }
 
 .scanIndicator {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: var(--accent-subtle);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 12px;
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--green);
-  animation: pulse 1.5s ease-in-out infinite;
-  box-shadow: 0 0 6px var(--green);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 1.5s ease infinite;
 }
 
 .scanLabel {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  color: var(--accent-2);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--green);
 }
 
 .title {
@@ -99,7 +105,7 @@
 }
 
 .btn:hover {
-  background: var(--accent-2);
+  background: var(--accent-light);
   transform: scale(1.02);
 }
 

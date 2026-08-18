@@ -1060,13 +1060,13 @@ export default function AR() {
       )}
 
       {status === 'ready' && (
-        <div className={styles.topBar}>
-          <div className={styles.topLogo}>◈ AR Studio</div>
+        <header className={styles.topBar}>
+          <span className={styles.topLogo}>LILCO STEM AR</span>
           <div className={`${styles.trackBadge} ${tracked ? styles.trackBadgeActive : ''}`}>
             <span className={styles.trackDot} />
-            {tracked ? 'Tracking' : 'Searching…'}
+            <span>{tracked ? 'Target Locked' : 'Searching Target'}</span>
           </div>
-        </div>
+        </header>
       )}
 
       {status === 'ready' && activeExperience && (

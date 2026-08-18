@@ -31,7 +31,7 @@ export default function QRModal({ url, onClose }) {
             value={url}
             size={200}
             bgColor="transparent"
-            fgColor="#f0f0f5"
+            fgColor="#0f172a"
             level="M"
           />
         </div>
