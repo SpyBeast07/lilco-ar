@@ -1,34 +1,82 @@
 [
   {
-    "targetImageUrl": "/Tiffin.jpg",
-    "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
-    "cardTitle": "Eurobliz AR Demo",
+    "targetImageUrl": "/Chemical Bonding & Molecular Orbital.png",
+    "youtubeUrl": "https://youtube.com/shorts/j67uvRFzGOk?feature=share",
+    "cardTitle": "Chemical Bonding & Molecular Orbital",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://www.eurobliz.eu"
+    "buttonUrl": "https://youtu.be/O192jrR80oo?si=jst7iColY0d_MenX"
   },
   {
-    "targetImageUrl": "/1.png",
-    "youtubeUrl": "https://youtu.be/kzYjbsQElaE?si=aMcJXp4YV-7oyqND",
-    "cardTitle": "Le P'tit Quinquin",
+    "targetImageUrl": "/Double Pendulum.png",
+    "youtubeUrl": "https://youtube.com/shorts/K03Anklea_o?feature=share",
+    "cardTitle": "Double Pendulum",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://fr.wikipedia.org/wiki/P%27tit_Quinquin_%28chanson%29"
+    "buttonUrl": "https://youtu.be/fZKrUgm9R1o?si=FJeLalRaQveATbxb"
   },
   {
-    "targetImageUrl": "/2.png",
-    "youtubeUrl": "https://youtu.be/7LejNGiNc2o?si=ch9cMqidttQ1Hv1Q",
-    "cardTitle": "Alphonse & Zulma",
+    "targetImageUrl": "/Wave Particle Duality.png",
+    "youtubeUrl": "https://youtube.com/shorts/QDZlnmsxwiU?feature=share",
+    "cardTitle": "Wave Particle Duality",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://www.lepetrouchka.com/alphonse-et-zulma.html"
+    "buttonUrl": "https://youtu.be/Ey25vULQ6YM?si=86mBzyZCUXjhaXQt"
   },
   {
-    "targetImageUrl": "/3.png",
-    "youtubeUrl": "https://youtu.be/USFcaK4cd1E?si=wHMHqfOOXYo2h08k",
-    "cardTitle": "Les gens du Nord",
+    "targetImageUrl": "/General Relativity Concept.png",
+    "youtubeUrl": "https://youtube.com/shorts/70rXS6dDfDk?feature=share",
+    "cardTitle": "General Relativity Concept",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://fr.wikipedia.org/wiki/Les_Gens_du_Nord"
+    "buttonUrl": "https://youtu.be/bFGiQEEvh18?si=Z6yVROHebp07ar-J"
+  },
+  {
+    "targetImageUrl": "/Photoelectric Effect.png",
+    "youtubeUrl": "https://youtube.com/shorts/jXMRmQla-GE?feature=share",
+    "cardTitle": "Photoelectric Effect",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/byEaU9ILHmw?si=ZmPOiMa94yD-m0Gx"
+  },
+  {
+    "targetImageUrl": "/Laplace Demon.png",
+    "youtubeUrl": "https://youtube.com/shorts/TXG1KhCb8wA?feature=share",
+    "cardTitle": "Laplace Demon",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/y4tItkTpBsg?si=l9VE1xrG-CrZxhzb"
+  },
+  {
+    "targetImageUrl": "/Konigsberg Bridge.png",
+    "youtubeUrl": "https://youtube.com/shorts/S76P5MigK2M?feature=share",
+    "cardTitle": "Konigsberg Bridge",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/nZwSo4vfw6c?si=hGrYeE5iWbc5G7AE"
+  },
+  {
+    "targetImageUrl": "/Maxwell's Demon.png",
+    "youtubeUrl": "https://youtu.be/avI71WYP08k",
+    "cardTitle": "Maxwell's Demon",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/8kcvyoHsXrw?si=do84SKC8La_BtODs"
+  },
+  {
+    "targetImageUrl": "/Quantum Constellation.png",
+    "youtubeUrl": "https://youtube.com/shorts/Bw38jYBLAmE?feature=share",
+    "cardTitle": "Quantum Constellation",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/lZ3bPUKo5zc?si=MqZUSTQbHCjwiGAe"
+  },
+  {
+    "targetImageUrl": "/Principal of Conservation of Momentum.png",
+    "youtubeUrl": "https://youtube.com/shorts/KhDjo6rLF30?feature=share",
+    "cardTitle": "Principal of Conservation of Momentum",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://youtu.be/1GvCIlHihEA?si=B24trae7vpwE1F_l"
   }
 ]
