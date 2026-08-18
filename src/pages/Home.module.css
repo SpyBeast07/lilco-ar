@@ -578,7 +578,7 @@
   margin-top: auto;
 }
 
-/* Media Queries for full Responsiveness */
+/* Media Queries for full Responsiveness (including Capacitor Mobile shells) */
 @media (max-width: 900px) {
   .hero {
     padding: 40px 0 60px;

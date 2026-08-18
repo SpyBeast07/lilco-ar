@@ -117,7 +117,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className={styles.hero}>
           <div className={styles.heroBadges}>
-            <div className={styles.badge}>Web AR Ready</div>
+            <div className={styles.badge}>Capacitor Mobile Ready</div>
             {compilingStatus === 'compiling' && (
               <div className={`${styles.badge} ${styles.badgeCompiling}`}>
                 <span className={styles.statusPulse} />

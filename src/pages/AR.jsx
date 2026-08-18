@@ -407,7 +407,7 @@ export async function compileTargetImages(targetImageUrls, onProgress) {
 //
 // Cache key: the sorted, path-only filenames of target images joined by '|'.
 // Using only the pathname (not the full origin) makes the key stable across
-// environments (e.g., localhost vs production HTTPS).
+// environments (web localhost vs Capacitor capacitor://localhost vs prod HTTPS).
 // ---------------------------------------------------------------------------
 
 const DB_NAME = 'AR_TARGETS_CACHE_DB'
@@ -431,8 +431,8 @@ function getDB() {
 
 /**
  * Build a stable, environment-independent cache key from a list of target image URLs.
- * We strip the origin and query-string and sort so the key is identical regardless
- * of protocol or host variations.
+ * We strip the origin and query-string and sort so the key is identical on both
+ * web (http://localhost:5173) and Android (capacitor://localhost).
  */
 function buildStableCacheKey(targetImageUrls) {
   const paths = targetImageUrls.map((url) => {
@@ -530,7 +530,7 @@ export default function AR() {
             throw new Error('At least one experience must include targetImageUrl or mindDataUrl.')
           }
 
-          // Build a stable key that is identical across web environments
+          // Build a stable key that is identical across web + Capacitor environments
           const cacheKey = buildStableCacheKey(targetImageUrls)
 
           // 1. In-memory cache (fastest — same JS session)

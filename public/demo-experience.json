@@ -9,26 +9,26 @@
   },
   {
     "targetImageUrl": "/1.png",
-    "youtubeUrl": "https://youtube.com/shorts/j67uvRFzGOk?feature=share",
+    "youtubeUrl": "https://youtu.be/kzYjbsQElaE?si=aMcJXp4YV-7oyqND",
     "cardTitle": "Le P'tit Quinquin",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://youtu.be/O192jrR80oo?si=jst7iColY0d_MenX"
+    "buttonUrl": "https://fr.wikipedia.org/wiki/P%27tit_Quinquin_%28chanson%29"
   },
   {
     "targetImageUrl": "/2.png",
-    "youtubeUrl": "https://youtube.com/shorts/K03Anklea_o?feature=share",
+    "youtubeUrl": "https://youtu.be/7LejNGiNc2o?si=ch9cMqidttQ1Hv1Q",
     "cardTitle": "Alphonse & Zulma",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://youtu.be/fZKrUgm9R1o?si=FJeLalRaQveATbxb"
+    "buttonUrl": "https://www.lepetrouchka.com/alphonse-et-zulma.html"
   },
   {
     "targetImageUrl": "/3.png",
-    "youtubeUrl": "https://youtube.com/shorts/QDZlnmsxwiU?feature=share",
+    "youtubeUrl": "https://youtu.be/USFcaK4cd1E?si=wHMHqfOOXYo2h08k",
     "cardTitle": "Les gens du Nord",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
-    "buttonUrl": "https://youtu.be/Ey25vULQ6YM?si=86mBzyZCUXjhaXQt"
+    "buttonUrl": "https://fr.wikipedia.org/wiki/Les_Gens_du_Nord"
   }
 ]

@@ -1,6 +1,6 @@
 # AR Studio
 
-AR Studio is a Vite + React image-tracking AR web application. The app loads an AR experience from a backend-style JSON endpoint, compiles the configured target image with MindAR in the browser, and opens the camera-based AR viewer.
+AR Studio is a Vite + React image-tracking AR demo app. The app loads one AR experience from a backend-style JSON endpoint, compiles the configured target image with MindAR, and opens the camera-based AR viewer.
 
 ## Features
 
@@ -18,7 +18,9 @@ AR Studio is a Vite + React image-tracking AR web application. The app loads an 
 
 ## Current Demo Flow
 
-This project is set up as a demo AR app. The AR content is controlled from the backend/config file:
+This project is now set up as a demo AR app, not an admin panel.
+
+The app user only opens the viewer. The AR content is controlled from the backend/config file:
 
 ```text
 User opens app -> app fetches JSON config -> app prepares target image -> camera opens -> user scans target image
@@ -41,6 +43,7 @@ To change the demo, edit that JSON file and replace the target image URL, video 
 - Three.js
 - qrcode.react
 - uuid
+- Capacitor 7 (Android/iOS native shell)
 
 ## Routes
 
@@ -76,11 +79,7 @@ ar-app/
     │   ├── Setup.jsx
     │   ├── Setup.module.css
     │   ├── AR.jsx
-    │   ├── AR.module.css
-    │   ├── ARWrapper.jsx
-    │   ├── ARWrapper.module.css
-    │   ├── Home.jsx
-    │   └── Home.module.css
+    │   └── AR.module.css
     └── components/
         ├── ARCard.jsx
         ├── ARCard.module.css
@@ -96,7 +95,13 @@ Install the following before running the project:
 - npm
 - A modern browser with camera support
 
-For AR testing on a mobile device, the phone and development machine should usually be on the same network or hosted via HTTPS.
+For AR testing on a phone, the phone and development machine should usually be on the same network.
+
+### Android APK Build Prerequisites
+
+- Java 17 (JDK)
+- Android Studio (with Android SDK 34+)
+- Android SDK command-line tools
 
 ## Run From Scratch
 
@@ -237,11 +242,35 @@ npm run preview
 
 Serves the production build locally for preview.
 
+```bash
+npx cap copy
+```
+
+Copies the web build (`dist/`) into the native Android/iOS project.
+
+```bash
+npx cap sync
+```
+
+Copies web assets and updates native plugin dependencies.
+
+```bash
+npx cap open android
+```
+
+Opens the Android project in Android Studio for building the APK.
+
+```bash
+npx cap run android
+```
+
+Builds and runs the app on a connected Android device (requires JDK + Android SDK).
+
 ## Usage Notes
 
 ### Storage
 
-The main app no longer depends on `localStorage` for the demo experience. It loads the AR config from JSON, which is closer to how the production app should work.
+The main app no longer depends on `localStorage` for the demo experience. It loads the AR config from JSON, which is closer to how the mobile app should work.
 
 The old setup page at `/setup` still uses `localStorage`; treat it as a development helper, not the production flow.
 
@@ -292,6 +321,80 @@ Deploy the generated `dist` folder.
 
 Important: for the AR camera viewer, deploy to HTTPS.
 
+## Android APK Build
+
+This project uses **Capacitor** to package the web AR viewer into a native Android app. The same codebase works on both browsers and the APK — no React Native or WebView bridge needed.
+
+### 1. Prerequisites
+
+- Java 17 JDK
+- Android Studio (with Android SDK 34+)
+- An Android device with a camera (or an emulator with a virtual camera)
+
+### 2. Build the Web App
+
+```bash
+npm run build
+```
+
+This produces the production build in `dist/`.
+
+### 3. Sync with Capacitor
+
+```bash
+npx cap copy
+```
+
+This copies `dist/` into the Android project at `android/app/src/main/assets/public`.
+
+### 4. Open in Android Studio
+
+```bash
+npx cap open android
+```
+
+Android Studio opens with the Capacitor project loaded.
+
+### 5. Build the APK
+
+In Android Studio:
+
+1. Wait for Gradle sync to finish.
+2. Go to **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+3. The APK is generated at:
+   ```
+   android/app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+Or for a signed release build: **Build → Generate Signed Bundle / APK**.
+
+### 6. Install on Device
+
+Transfer the APK to your Android device and open it. Grant camera permission when prompted.
+
+### Tip: Quick Test via CLI
+
+If you have a connected device with USB debugging enabled:
+
+```bash
+npx cap run android
+```
+
+This builds and installs the app directly.
+
+### Important Notes
+
+- Camera requires **Android permissions** — Capacitor handles this automatically but the user must grant it on first launch.
+- MindAR requires **WebGL** — all modern Android devices support this.
+- For **iOS**, add the iOS platform and repeat the same steps:
+
+  ```bash
+  npx cap add ios
+  npx cap open ios
+  ```
+
+  iOS requires Xcode and an Apple Developer account for device installation.
+
 ## Troubleshooting
 
 ### Experience config could not be loaded
@@ -324,3 +427,6 @@ Important: for the AR camera viewer, deploy to HTTPS.
 - Add Firebase, Supabase, or another API for production config storage.
 - Add validation for target image, video, and button URLs.
 - Add automated tests.
+- Sign release APK with a keystore for Play Store distribution.
+- Add iOS platform with `npx cap add ios`.
+- Add Capacitor plugins for native features (haptic feedback, splash screen, etc.).
