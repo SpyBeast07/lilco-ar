@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box3, Group, Vector3 } from 'three'
+import { AmbientLight, Box3, DirectionalLight, Group, HemisphereLight, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
@@ -378,9 +378,12 @@ async function createTargetMedia(exp) {
   return createMp4Player(exp.videoUrl)
 }
 
-// Loads a GLB model and returns a group centered at its own origin, rotated so
-// it stands upright out of the tracked image plane (+Z faces the camera), and
-// normalized to fit within roughly 80% of the target marker width.
+// Loads a GLB model and normalizes it so the largest dimension is exactly 0.8
+// "marker units". Normalization is applied through the model's OWN node
+// transform (position/scale), NOT by mutating vertex data: the GLB hierarchy
+// carries non-uniform node scales (e.g. the exported FBX/Box chains), and
+// baking them into geometry would leave those node scales applied on top,
+// producing a wildly oversized, mispositioned model.
 function loadGlbModel(url) {
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader()
@@ -388,10 +391,8 @@ function loadGlbModel(url) {
       new URL(url, window.location.href).toString(),
       (gltf) => {
         try {
-          const root = new Group()
           const model = gltf.scene
 
-          // Normalize: fit the largest dimension into 0.8 marker units.
           const box = new Box3().setFromObject(model)
           const center = new Vector3()
           const size = new Vector3()
@@ -403,17 +404,7 @@ function loadGlbModel(url) {
           model.position.sub(center).multiplyScalar(scale)
           model.scale.multiplyScalar(scale)
 
-          // GLB models are +Y up; the tracked image plane is XY with +Z toward
-          // the camera, so tilt the model to rise up out of the image.
-          const inner = new Group()
-          inner.rotation.x = -Math.PI / 2
-          inner.add(model)
-
-          // Lift the model so its base sits on the plane instead of half-buried.
-          inner.position.z = (size.y * scale) / 2
-
-          root.add(inner)
-          resolve(root)
+          resolve(model)
         } catch (err) {
           reject(err)
         }
@@ -726,6 +717,15 @@ export default function AR() {
         // This is the only approach that works reliably on Android WebViews.
         cssRenderer.domElement.style.pointerEvents = 'none'
 
+        // GLB diagrams use MeshStandardMaterial, which needs light sources, or
+        // it renders black. MindAR's scene starts dark, so add lights here.
+        // Render in sRGB so glTF linear-space base colors come out correct.
+        renderer.outputEncoding = 3001 // THREE.sRGBEncoding
+        const hemiLight = new HemisphereLight(0xffffff, 0x404040, 1.1)
+        const dirLight = new DirectionalLight(0xffffff, 1.6)
+        dirLight.position.set(4, 8, 6)
+        scene.add(hemiLight, dirLight)
+
         mediaPlayersRef.current = []
         const anchorSetups = []
         const pxScale = 1000
@@ -797,19 +797,23 @@ export default function AR() {
           anchor.group.add(cssObj)
 
           // Load the interactive 3D diagram if the experience configures one.
+          // The normalized model lives inside this wrapper group, which is
+          // placed in world space (scene root) each frame so the card's rotation
+          // cannot tilt it — see updateModelTransforms. Using position/scale on
+          // the wrapper keeps the model's own node-scale normalization intact.
           let modelGroup = null
           if (experience.glbModelUrl) {
             try {
-              modelGroup = await loadGlbModel(experience.glbModelUrl)
+              const model = await loadGlbModel(experience.glbModelUrl)
               if (cancelled) {
-                disposeGlbModel(modelGroup)
+                disposeGlbModel(model)
                 mindarRef.current.stop()
                 return
               }
+              modelGroup = new Group()
+              modelGroup.add(model)
               modelGroup.visible = false
-              // Center on the marker plane in MindAR marker-local units.
-              modelGroup.position.set(targetW / 2, targetH / 2, 0)
-              anchor.group.add(modelGroup)
+              scene.add(modelGroup)
             } catch (err) {
               console.warn('GLB model failed to load', experience.glbModelUrl, err)
               modelGroup = null
@@ -823,6 +827,7 @@ export default function AR() {
             media,
             mediaPromise: null,
             modelGroup,
+            anchor,
           }
           anchorSetups.push(setup)
 
@@ -930,10 +935,31 @@ export default function AR() {
           }
         }
 
+        // Keeps every 3D diagram standing upright regardless of how the card is
+        // held. Each frame it re-positions each model at its marker's world spot
+        // but forces an identity (upright, camera-aligned) rotation and a scale
+        // matching the marker's world size. The model itself keeps its own
+        // normalized node transform inside the wrapper group.
+        const modelPos = new Vector3()
+        const modelScaleAxis = new Vector3()
+        const updateModelTransforms = () => {
+          for (let i = 0; i < anchorSetups.length; i += 1) {
+            const setup = anchorSetups[i]
+            if (!setup.modelGroup) continue
+            const anchorMatrix = setup.anchor.group.matrix
+            modelPos.setFromMatrixPosition(anchorMatrix)
+            modelScaleAxis.setFromMatrixScale(anchorMatrix)
+            setup.modelGroup.position.copy(modelPos)
+            setup.modelGroup.scale.setScalar(modelScaleAxis.x)
+            setup.modelGroup.rotation.set(0, 0, 0)
+          }
+        }
+
         renderer.setAnimationLoop(() => {
+          runArbitration()
+          updateModelTransforms()
           renderer.render(scene, camera)
           cssRenderer.render(scene, camera)
-          runArbitration()
         })
 
         // Force MindAR to re-layout when the container resizes (orientation,
