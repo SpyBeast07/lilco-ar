@@ -496,6 +496,10 @@ export default function AR() {
   // Ref to the active media player for the currently-tracked target, so the
   // React-layer tap overlay can call toggle() without needing closure captures.
   const activeMediaRef = useRef(null)
+  // Ref used by the per-frame arbiter. Exactly one experience may be active at a
+  // time. This prevents multiple videos from stacking when target images share
+  // common elements and MindAR briefly tracks several candidates at once.
+  const arbiterRef = useRef({ activeIndex: -1 })
 
   const [config, setConfig] = useState(null)
   const [activeExperience, setActiveExperience] = useState(null)
@@ -602,7 +606,14 @@ export default function AR() {
         mindarRef.current = new MindARThree({
           container: containerRef.current,
           imageTargetSrc: mindBlobUrl,
-          maxTrack: targetCount,
+          // Track at most one target at a time so overlapping detections from
+          // images that share common elements can never play multiple videos.
+          maxTrack: 1,
+          // Require a target to be tracked steadily across several frames before
+          // it is shown. Partial/spurious matches (shared elements) flicker and
+          // drop out, while the real, persistent match surfaces as the winner.
+          warmupTolerance: 8,
+          missTolerance: 5,
           uiLoading: 'no',
           uiScanning: 'no',
           uiError: 'no',
@@ -694,34 +705,18 @@ export default function AR() {
           }
           anchorSetups.push(setup)
 
+          // Visibility and playback are decided by the per-frame arbiter in the
+          // animation loop, not by these events. The events are only used to
+          // kick off media preparation so the arbiter never has to block.
           anchor.onTargetFound = () => {
             if (cancelled) return
-            setup.cssObj.visible = true
-            setActiveExperience(setup.experience)
-            setTracked(true)
-            activeMediaRef.current = setup.media
-            if (setup.media) {
-              setup.media.play()
-              return
-            }
-            ensureMedia(setup)
-              .then((media) => {
-                if (!cancelled) {
-                  setup.cssObj.visible = true
-                  activeMediaRef.current = media
-                  media.play()
-                }
-              })
-              .catch((err) => {
-                console.warn('Media failed to load for target', setup.experience.targetImageUrl, err)
-              })
+            ensureMedia(setup).catch((err) => {
+              console.warn('Media failed to load for target', setup.experience.targetImageUrl, err)
+            })
           }
           anchor.onTargetLost = () => {
-            setup.cssObj.visible = false
-            setup.media?.pause()
-            activeMediaRef.current = null
-            setActiveExperience(null)
-            setTracked(false)
+            // No-op: the arbiter owns active state, so a "lost" event for one
+            // target can't wrongly clear another target that is still showing.
           }
         }
 
@@ -735,9 +730,92 @@ export default function AR() {
           ensureMedia(setup).catch(() => {})
         })
 
+        // ------------------------------------------------------------------
+        // Single-active-target arbiter. Runs every frame from MindAR's live
+        // tracking state and guarantees at most ONE video is visible/playing,
+        // even during the brief window where shared elements make MindAR report
+        // several candidates as "showing" at once.
+        // ------------------------------------------------------------------
+        const runArbitration = () => {
+          const controller = mindarRef.current?.controller
+          if (!controller || !Array.isArray(controller.trackingStates)) return
+          const states = controller.trackingStates
+          if (states.length !== anchorSetups.length) return
+
+          const showing = []
+          for (let i = 0; i < states.length; i += 1) {
+            if (states[i].showing) showing.push(i)
+          }
+
+          if (showing.length === 0) {
+            if (arbiterRef.current.activeIndex !== -1) {
+              arbiterRef.current.activeIndex = -1
+              activeMediaRef.current = null
+              setActiveExperience(null)
+              setTracked(false)
+            }
+            anchorSetups.forEach((setup) => {
+              if (setup.cssObj.visible) setup.cssObj.visible = false
+              setup.media?.pause()
+            })
+            return
+          }
+
+          // Prefer the most stable candidate: the one that has been tracked for
+          // the most consecutive frames is the real match, while partial matches
+          // from shared elements tend to flicker and have lower counts.
+          let activeIndex = showing[0]
+          let bestCount = states[showing[0]].trackCount
+          for (let k = 1; k < showing.length; k += 1) {
+            const i = showing[k]
+            if (states[i].trackCount > bestCount) {
+              bestCount = states[i].trackCount
+              activeIndex = i
+            }
+          }
+
+          if (arbiterRef.current.activeIndex !== activeIndex) {
+            const prev = arbiterRef.current.activeIndex
+            if (prev !== -1 && prev !== activeIndex) {
+              const prevSetup = anchorSetups[prev]
+              prevSetup.cssObj.visible = false
+              prevSetup.media?.pause()
+            }
+
+            arbiterRef.current.activeIndex = activeIndex
+
+            // Enforce exactly one visible wrapper every time the winner changes.
+            for (let i = 0; i < anchorSetups.length; i += 1) {
+              const isActive = i === activeIndex
+              if (anchorSetups[i].cssObj.visible !== isActive) {
+                anchorSetups[i].cssObj.visible = isActive
+              }
+            }
+
+            const setup = anchorSetups[activeIndex]
+            activeMediaRef.current = setup.media ?? null
+            setActiveExperience(setup.experience)
+            setTracked(true)
+
+            if (setup.media) {
+              setup.media.play()
+            } else {
+              ensureMedia(setup)
+                .then((media) => {
+                  if (!cancelled && arbiterRef.current.activeIndex === activeIndex) {
+                    activeMediaRef.current = media
+                    media.play()
+                  }
+                })
+                .catch(() => {})
+            }
+          }
+        }
+
         renderer.setAnimationLoop(() => {
           renderer.render(scene, camera)
           cssRenderer.render(scene, camera)
+          runArbitration()
         })
 
         // Force MindAR to re-layout when the container resizes (orientation,
@@ -765,6 +843,7 @@ export default function AR() {
     return () => {
       cancelled = true
       activeMediaRef.current = null
+      arbiterRef.current.activeIndex = -1
       if (resizeObserverRef.current) {
         resizeObserverRef.current.disconnect()
         resizeObserverRef.current = null
