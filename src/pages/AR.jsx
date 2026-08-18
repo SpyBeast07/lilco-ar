@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Box3, Group, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
 import styles from './AR.module.css'
 
@@ -376,6 +378,87 @@ async function createTargetMedia(exp) {
   return createMp4Player(exp.videoUrl)
 }
 
+// Loads a GLB model and returns a group centered at its own origin, rotated so
+// it stands upright out of the tracked image plane (+Z faces the camera), and
+// normalized to fit within roughly 80% of the target marker width.
+function loadGlbModel(url) {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader()
+    loader.load(
+      new URL(url, window.location.href).toString(),
+      (gltf) => {
+        try {
+          const root = new Group()
+          const model = gltf.scene
+
+          // Normalize: fit the largest dimension into 0.8 marker units.
+          const box = new Box3().setFromObject(model)
+          const center = new Vector3()
+          const size = new Vector3()
+          box.getCenter(center)
+          box.getSize(size)
+          const maxDim = Math.max(size.x, size.y, size.z)
+          const scale = maxDim > 0 ? 0.8 / maxDim : 1
+
+          model.position.sub(center).multiplyScalar(scale)
+          model.scale.multiplyScalar(scale)
+
+          // GLB models are +Y up; the tracked image plane is XY with +Z toward
+          // the camera, so tilt the model to rise up out of the image.
+          const inner = new Group()
+          inner.rotation.x = -Math.PI / 2
+          inner.add(model)
+
+          // Lift the model so its base sits on the plane instead of half-buried.
+          inner.position.z = (size.y * scale) / 2
+
+          root.add(inner)
+          resolve(root)
+        } catch (err) {
+          reject(err)
+        }
+      },
+      undefined,
+      (err) => reject(err)
+    )
+  })
+}
+
+// Applies the current display mode (2D video vs 3D diagram) to every anchor
+// setup. Exactly one thing is visible for the active target.
+function applyDisplay(setups, activeIndex, mode) {
+  for (let i = 0; i < setups.length; i += 1) {
+    const setup = setups[i]
+    const isActive = i === activeIndex
+    const useModel = isActive && mode === '3d' && setup.modelGroup != null
+
+    setup.cssObj.visible = isActive && !useModel
+    if (setup.modelGroup) setup.modelGroup.visible = useModel
+
+    if (isActive && setup.media) {
+      if (useModel) setup.media.pause()
+      else setup.media.play()
+    }
+  }
+}
+
+// Traverses a mounted GLB scene and releases its GPU resources.
+function disposeGlbModel(root) {
+  if (!root) return
+  root.traverse((obj) => {
+    if (obj.geometry) obj.geometry.dispose()
+    if (obj.material) {
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material]
+      materials.forEach((mat) => {
+        Object.values(mat).forEach((value) => {
+          if (value && typeof value.dispose === 'function') value.dispose()
+        })
+        mat.dispose()
+      })
+    }
+  })
+}
+
 export async function compileTargetImages(targetImageUrls, onProgress) {
   await importMindARBundle(() => import('mind-ar/dist/mindar-image.prod.js'))
   const Compiler = window.MINDAR?.IMAGE?.Compiler
@@ -500,6 +583,11 @@ export default function AR() {
   // time. This prevents multiple videos from stacking when target images share
   // common elements and MindAR briefly tracks several candidates at once.
   const arbiterRef = useRef({ activeIndex: -1 })
+  // Anchor setups are captured by the init effect; keep them in a ref so the
+  // display-mode effect can re-apply visibility when the user toggles 2D/3D.
+  const anchorSetupsRef = useRef([])
+  // Mirror of `mode` state for use inside the non-React animation loop.
+  const modeRef = useRef('2d')
 
   const [config, setConfig] = useState(null)
   const [activeExperience, setActiveExperience] = useState(null)
@@ -508,6 +596,18 @@ export default function AR() {
   const [compileProgress, setCompileProgress] = useState(0)
   const [errorMsg, setErrorMsg] = useState('')
   const [tracked, setTracked] = useState(false)
+  // Display mode for the active experience: '2d' shows the anchored video,
+  // '3d' swaps in the GLB model when the experience configures one.
+  const [mode, setMode] = useState('2d')
+
+  // Keep the mode ref in sync so the animation loop arbiter reads fresh values.
+  useEffect(() => {
+    modeRef.current = mode
+    const setups = anchorSetupsRef.current
+    if (!setups.length) return
+    // Re-apply visibility/playback without changing which target is active.
+    applyDisplay(setups, arbiterRef.current.activeIndex, mode)
+  }, [mode])
 
   // Effect 1: load config from backend endpoint and compile target image if needed.
   useEffect(() => {
@@ -696,12 +796,33 @@ export default function AR() {
           const anchor = mindarRef.current.addAnchor(index)
           anchor.group.add(cssObj)
 
+          // Load the interactive 3D diagram if the experience configures one.
+          let modelGroup = null
+          if (experience.glbModelUrl) {
+            try {
+              modelGroup = await loadGlbModel(experience.glbModelUrl)
+              if (cancelled) {
+                disposeGlbModel(modelGroup)
+                mindarRef.current.stop()
+                return
+              }
+              modelGroup.visible = false
+              // Center on the marker plane in MindAR marker-local units.
+              modelGroup.position.set(targetW / 2, targetH / 2, 0)
+              anchor.group.add(modelGroup)
+            } catch (err) {
+              console.warn('GLB model failed to load', experience.glbModelUrl, err)
+              modelGroup = null
+            }
+          }
+
           const setup = {
             experience,
             wrapper,
             cssObj,
             media,
             mediaPromise: null,
+            modelGroup,
           }
           anchorSetups.push(setup)
 
@@ -722,6 +843,9 @@ export default function AR() {
 
         await mindarRef.current.start()
         if (cancelled) { mindarRef.current.stop(); return }
+
+        // Expose the built setups to the mode-toggle effect and cleanup.
+        anchorSetupsRef.current = anchorSetups
 
         setStatus('ready')
 
@@ -756,6 +880,7 @@ export default function AR() {
             }
             anchorSetups.forEach((setup) => {
               if (setup.cssObj.visible) setup.cssObj.visible = false
+              if (setup.modelGroup?.visible) setup.modelGroup.visible = false
               setup.media?.pause()
             })
             return
@@ -783,28 +908,21 @@ export default function AR() {
             }
 
             arbiterRef.current.activeIndex = activeIndex
-
-            // Enforce exactly one visible wrapper every time the winner changes.
-            for (let i = 0; i < anchorSetups.length; i += 1) {
-              const isActive = i === activeIndex
-              if (anchorSetups[i].cssObj.visible !== isActive) {
-                anchorSetups[i].cssObj.visible = isActive
-              }
-            }
+            applyDisplay(anchorSetups, activeIndex, modeRef.current)
 
             const setup = anchorSetups[activeIndex]
             activeMediaRef.current = setup.media ?? null
             setActiveExperience(setup.experience)
             setTracked(true)
 
-            if (setup.media) {
-              setup.media.play()
-            } else {
+            // Lazy media (only when eager creation was skipped) needs async
+            // creation before it can start; applyDisplay drives playback.
+            if (!setup.media) {
               ensureMedia(setup)
                 .then((media) => {
                   if (!cancelled && arbiterRef.current.activeIndex === activeIndex) {
                     activeMediaRef.current = media
-                    media.play()
+                    applyDisplay(anchorSetups, arbiterRef.current.activeIndex, modeRef.current)
                   }
                 })
                 .catch(() => {})
@@ -850,6 +968,15 @@ export default function AR() {
       }
       mediaPlayersRef.current.forEach((media) => media.destroy())
       mediaPlayersRef.current = []
+      anchorSetupsRef.current.forEach((setup) => {
+        if (setup.modelGroup) {
+          try {
+            setup.modelGroup.parent?.remove(setup.modelGroup)
+            disposeGlbModel(setup.modelGroup)
+          } catch (_) {}
+        }
+      })
+      anchorSetupsRef.current = []
       if (mindarRef.current) {
         try { mindarRef.current.stop() } catch (_) {}
         mindarRef.current = null
@@ -870,9 +997,10 @@ export default function AR() {
     <div className={styles.page}>
       <div ref={containerRef} className={styles.arContainer} />
 
-      {/* Full-screen tap overlay — only active when a target is being tracked.
+      {/* Full-screen tap overlay — only active when a target is being tracked
+          and a video is actually on screen (hidden while showing the 3D model).
           Lives in the normal 2D DOM so touch events work on every platform. */}
-      {status === 'ready' && tracked && (
+      {status === 'ready' && tracked && !(mode === '3d' && activeExperience?.glbModelUrl) && (
         <div
           className={styles.tapOverlay}
           onPointerDown={handleTapOverlay}
@@ -916,7 +1044,7 @@ export default function AR() {
       )}
 
       {status === 'ready' && activeExperience && (
-        <ARCard config={activeExperience} visible={tracked} />
+        <ARCard config={activeExperience} visible={tracked} mode={mode} onToggleMode={setMode} />
       )}
     </div>
   )

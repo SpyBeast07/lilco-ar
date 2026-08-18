@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './ARCard.module.css'
 
-export default function ARCard({ config, visible }) {
+export default function ARCard({ config, visible, mode = '2d', onToggleMode }) {
   const [mounted, setMounted] = useState(false)
   const mountedRef = useRef(false)
+  const hasModel = Boolean(config?.glbModelUrl)
 
   useEffect(() => {
     if (visible) {
@@ -33,6 +34,25 @@ export default function ARCard({ config, visible }) {
 
         <h3 className={styles.title}>{config.cardTitle}</h3>
         {config.cardBody && <p className={styles.body}>{config.cardBody}</p>}
+
+        {hasModel && (
+          <div className={styles.modeToggle} role="group" aria-label="Display mode">
+            <button
+              type="button"
+              className={`${styles.modeBtn} ${mode === '2d' ? styles.modeBtnActive : ''}`}
+              onClick={() => onToggleMode && onToggleMode('2d')}
+            >
+              2D Video
+            </button>
+            <button
+              type="button"
+              className={`${styles.modeBtn} ${mode === '3d' ? styles.modeBtnActive : ''}`}
+              onClick={() => onToggleMode && onToggleMode('3d')}
+            >
+              3D Diagram
+            </button>
+          </div>
+        )}
 
         {config.buttonUrl && (
           <a
