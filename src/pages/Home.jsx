@@ -6,16 +6,14 @@ import styles from './Home.module.css'
 export default function Home() {
   const navigate = useNavigate()
   const [demoExperiences, setDemoExperiences] = useState([])
-  const [customExperiences, setCustomExperiences] = useState([])
   const [loading, setLoading] = useState(true)
   const [compilingStatus, setCompilingStatus] = useState('idle') // 'idle' | 'compiling' | 'ready' | 'error'
   const [compilingProgress, setCompilingProgress] = useState(0)
 
-  // Fetch demo experiences and load custom experiences from localStorage
+  // Fetch demo experiences
   useEffect(() => {
     async function loadData() {
       try {
-        // Load default/demo experiences
         const response = await fetch('/demo-experience.json', { cache: 'no-store' })
         if (response.ok) {
           const data = await response.json()
@@ -23,28 +21,6 @@ export default function Home() {
         }
       } catch (err) {
         console.error('Failed to load demo experiences:', err)
-      }
-
-      try {
-        // Load custom experiences created via /setup
-        const customs = []
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i)
-          if (key && key.startsWith('ar_experience_')) {
-            try {
-              const id = key.replace('ar_experience_', '')
-              const exp = JSON.parse(localStorage.getItem(key))
-              customs.push({ id, ...exp })
-            } catch (e) {
-              console.error('Error parsing stored experience:', e)
-            }
-          }
-        }
-        // Sort by newest first
-        customs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-        setCustomExperiences(customs)
-      } catch (err) {
-        console.error('Failed to load custom experiences:', err)
       }
 
       setLoading(false)
@@ -91,10 +67,6 @@ export default function Home() {
 
   const handleLaunchDemo = () => {
     navigate('/ar')
-  }
-
-  const handleLaunchCustom = (id) => {
-    navigate(`/ar/${id}`)
   }
 
   return (
@@ -220,7 +192,7 @@ export default function Home() {
               <p className={styles.sectionSubtitle}>Scan these physical STEM diagram cards to trigger interactive video and 3D visualization overlays</p>
             </div>
             <div className={styles.targetCount}>
-              {demoExperiences.length + customExperiences.length} Active Modules
+              {demoExperiences.length} Active Modules
             </div>
           </div>
 
@@ -284,58 +256,6 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-
-              {/* Custom Targets Grid */}
-              {customExperiences.length > 0 && (
-                <>
-                  <div className={styles.gridHeader} style={{ marginTop: '48px' }}>
-                    <h3>Custom STEM Modules</h3>
-                    <span className={styles.badgeCustom}>Setup Drafts</span>
-                  </div>
-                  <div className={styles.grid}>
-                    {customExperiences.map((exp) => (
-                      <div key={exp.id} className={styles.card} onClick={() => handleLaunchCustom(exp.id)}>
-                        <div className={styles.cardPreviewContainer}>
-                          <div className={styles.abstractPlaceholder}>
-                            <div className={styles.wireframeGrid} />
-                            <span className={styles.placeholderIcon}>◈</span>
-                            <span className={styles.customTargetLabel}>Custom Target</span>
-                          </div>
-                          <div className={styles.scanline} />
-                          <div className={styles.cardOverlay}>
-                            <span className={styles.overlayScanText}>Scan target</span>
-                          </div>
-                        </div>
-                        <div className={styles.cardInfo}>
-                          <div className={styles.cardTitleRow}>
-                            <h4 className={styles.cardTitle}>{exp.cardTitle || 'Custom STEM Experience'}</h4>
-                            <span className={styles.statusDotCustom} />
-                          </div>
-                          <p className={styles.cardBody}>{exp.cardBody || 'A custom target compiled in LilCo AR Setup.'}</p>
-                          
-                          <div className={styles.expDetails}>
-                            <div className={styles.expDetailItem}>
-                              <span className={styles.expDetailLabel}>Video Source:</span>
-                              <span className={styles.expDetailValue}>
-                                {exp.youtubeUrl ? 'YouTube Stream' : 'Direct Video'}
-                              </span>
-                            </div>
-                            <div className={styles.expDetailItem}>
-                              <span className={styles.expDetailLabel}>Action Button:</span>
-                              <span className={styles.expDetailValue}>{exp.buttonLabel || 'None'}</span>
-                            </div>
-                          </div>
-
-                          <button className={styles.cardScanBtn} style={{ background: 'rgba(249, 115, 22, 0.15)', borderColor: 'rgba(249, 115, 22, 0.35)', color: 'var(--accent-2)' }}>
-                            <span>Scan Custom Target</span>
-                            <span className={styles.cardBtnArrow}>→</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
             </>
           )}
         </section>

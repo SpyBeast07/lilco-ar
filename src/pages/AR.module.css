@@ -131,57 +131,6 @@
   background: var(--surface-2);
 }
 
-/* Scanning overlay */
-.scanOverlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-  z-index: 10;
-  pointer-events: none;
-  animation: fadeIn 0.4s ease;
-}
-
-.scanFrame {
-  position: relative;
-  width: 220px;
-  height: 220px;
-}
-
-.scanCorner {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-}
-
-.scanCorner[data-pos="tl"] { top: 0; left: 0; border-top: 2.5px solid var(--accent); border-left: 2.5px solid var(--accent); border-radius: 3px 0 0 0; }
-.scanCorner[data-pos="tr"] { top: 0; right: 0; border-top: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); border-radius: 0 3px 0 0; }
-.scanCorner[data-pos="bl"] { bottom: 0; left: 0; border-bottom: 2.5px solid var(--accent); border-left: 2.5px solid var(--accent); border-radius: 0 0 0 3px; }
-.scanCorner[data-pos="br"] { bottom: 0; right: 0; border-bottom: 2.5px solid var(--accent); border-right: 2.5px solid var(--accent); border-radius: 0 0 3px 0; }
-
-.scanLine {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  box-shadow: 0 0 10px var(--accent-glow);
-  animation: scanline 2.5s ease-in-out infinite;
-  top: 0;
-}
-
-.scanHint {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.04em;
-  text-align: center;
-  padding: 0 40px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-}
-
 /* Top bar */
 .topBar {
   position: absolute;

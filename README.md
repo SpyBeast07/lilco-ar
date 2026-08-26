@@ -34,7 +34,6 @@ This application adopts the official **LilCo Signature Orange and Crisp White/Da
 - **STEM WebAR Target Scanner**: Real-time camera-based image tracking powered by MindAR and Three.js.
 - **Curriculum-Aligned STEM Modules**: Pre-configured interactive targets for Chemical Bonding, Wave Particle Duality, General Relativity, Photoelectric Effect, Maxwell's Demon, Laplace's Demon, Konigsberg Bridge, Double Pendulum, and Conservation of Momentum.
 - **Interactive 2D Video & 3D GLTF Model Overlays**: Toggle seamlessly between educational video playback and real-time interactive 3D WebGL diagrams (e.g. molecular structures).
-- **LilCo Creator Studio (`/setup`)**: Create, test, and publish custom image-tracking WebAR experiences with instant QR code sharing.
 - **Cross-Platform Native Shell**: Capacitor 7 Android and iOS native integration ready.
 
 ---
@@ -45,7 +44,6 @@ This application adopts the official **LilCo Signature Orange and Crisp White/Da
 - **Routing**: React Router DOM (v7 transition flags)
 - **Augmented Reality Engine**: MindAR (Image Tracking) + Three.js + CSS3DRenderer
 - **3D Model Loader**: Three.js GLTFLoader
-- **Utilities**: `qrcode.react`, `uuid`
 - **Native Mobile Wrapper**: Capacitor 7 (Android / iOS)
 
 ---
@@ -56,8 +54,7 @@ This application adopts the official **LilCo Signature Orange and Crisp White/Da
 | --- | --- |
 | `/` | **LilCo STEM AR Studio Homepage**: Catalog of trackable STEM target modules, company vision, offerings, team details, and quick launcher. |
 | `/ar` | **WebAR Scanner**: Live camera target tracker for default LilCo STEM modules. |
-| `/ar/:id` | **Custom WebAR Scanner**: Plays a user-created or backend-driven custom experience. |
-| `/setup` | **Creator Portal**: Step-by-step target image compilation and experience builder. |
+| `/ar/:id` | **Custom WebAR Scanner**: Plays a backend-driven custom experience. |
 
 ---
 

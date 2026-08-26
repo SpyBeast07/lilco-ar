@@ -425,7 +425,7 @@
   color: var(--text);
 }
 
-.badgeDemo, .badgeCustom {
+.badgeDemo {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
@@ -433,18 +433,9 @@
   letter-spacing: 0.04em;
   padding: 3px 8px;
   border-radius: 4px;
-}
-
-.badgeDemo {
   background: var(--accent-subtle);
   border: 1px solid rgba(249, 115, 22, 0.3);
   color: var(--accent-light);
-}
-
-.badgeCustom {
-  background: rgba(5, 150, 105, 0.1);
-  border: 1px solid rgba(5, 150, 105, 0.25);
-  color: var(--green);
 }
 
 /* Grids */
@@ -495,7 +486,7 @@
   transform: scale(1.05);
 }
 
-/* Abstract placeholder for customs */
+/* Abstract placeholder for cards without a target image */
 .abstractPlaceholder {
   position: relative;
   width: 100%;
@@ -509,33 +500,12 @@
   overflow: hidden;
 }
 
-.wireframeGrid {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(249, 115, 22, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(249, 115, 22, 0.08) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-position: center;
-}
-
 .placeholderIcon {
   font-size: 36px;
   color: var(--accent);
   position: relative;
   z-index: 2;
   animation: pulse 1.5s ease infinite;
-}
-
-.customTargetLabel {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent-light);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  position: relative;
-  z-index: 2;
 }
 
 /* Scan line sweep effect */
@@ -615,17 +585,12 @@
   color: var(--text);
 }
 
-.statusDot, .statusDotCustom {
+.statusDot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
-}
-
-.statusDotCustom {
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
 }
 
 .cardBody {
