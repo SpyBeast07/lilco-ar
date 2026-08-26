@@ -9,5 +9,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['mind-ar']
+  },
+  server: {
+    historyApiFallback: true
+  },
+  preview: {
+    historyApiFallback: true
   }
 })
