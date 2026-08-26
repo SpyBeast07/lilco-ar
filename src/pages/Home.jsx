@@ -89,7 +89,6 @@ export default function Home() {
         {/* Hero Section */}
         <section className={styles.hero}>
           <div className={styles.heroBadges}>
-            <div className={styles.badge}>European Commission & French Curriculum Compliant</div>
             {compilingStatus === 'compiling' && (
               <div className={`${styles.badge} ${styles.badgeCompiling}`}>
                 <span className={styles.statusPulse} />
@@ -108,11 +107,11 @@ export default function Home() {
             )}
           </div>
           <h1 className={styles.title}>
-            Welcome to the Future of<br />
-            <span className={styles.gradientText}>STEM Education</span>
+            We are <span className={styles.gradientText}>Lilco</span>,<br />
+            Your Interactive Console for STEM Education and Edutainment
           </h1>
           <p className={styles.subtitle}>
-            Discover a new paradigm in STEM Education. Like a streaming platform for your STEM resources, explore interactive WebAR target modules across Middle School, High School, and University curricula.
+            This is an AR-embed interactive app offered by Lilco. Any postcard with Lilco Logo on it can be scanned by the AR camera scanner below and each such postcard has some interesting Easter Eggs for your fun
           </p>
 
           <div className={styles.heroCtaGroup}>
