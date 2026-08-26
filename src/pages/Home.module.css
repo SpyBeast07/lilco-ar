@@ -584,6 +584,13 @@
   animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.galleryTitle {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
 .sectionHeader {
   display: flex;
   align-items: flex-end;
@@ -601,11 +608,6 @@
   color: var(--text);
 }
 
-.sectionSubtitle {
-  font-size: 14px;
-  color: var(--text-2);
-}
-
 .targetCount {
   background: var(--accent-subtle);
   border: 1px solid rgba(249, 115, 22, 0.3);
@@ -617,38 +619,11 @@
   border-radius: 100px;
 }
 
-.gridHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.gridHeader h3 {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-
-.badgeDemo {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: var(--accent-subtle);
-  border: 1px solid rgba(249, 115, 22, 0.3);
-  color: var(--accent-light);
-}
-
 /* Grids */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 28px;
+  gap: 24px;
 }
 
 /* Cards */
@@ -657,131 +632,48 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  border-color: var(--accent);
-  box-shadow: 0 16px 36px rgba(249, 115, 22, 0.18);
+  transform: translateY(-4px);
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
 }
 
-.cardPreviewContainer {
-  position: relative;
+.cardImageWrap {
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--bg-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cardImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
 }
 
-.card:hover .cardImage {
-  transform: scale(1.05);
-}
-
-/* Abstract placeholder for cards without a target image */
-.abstractPlaceholder {
-  position: relative;
+.cardImageFallback {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: radial-gradient(circle at center, #ffffff 0%, #fff7ed 100%);
-  overflow: hidden;
-}
-
-.placeholderIcon {
-  font-size: 36px;
+  font-size: 34px;
   color: var(--accent);
-  position: relative;
-  z-index: 2;
-  animation: pulse 1.5s ease infinite;
-}
-
-/* Scan line sweep effect */
-.scanline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  box-shadow: 0 0 12px var(--accent-glow);
-  z-index: 5;
-  animation: scanSweep 3s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes scanSweep {
-  0% { transform: translateY(-5px); }
-  50% { transform: translateY(calc(100% + 5px)); }
-  100% { transform: translateY(-5px); }
-}
-
-.cardOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 4;
-}
-
-.card:hover .cardOverlay {
-  opacity: 1;
-}
-
-.overlayScanText {
-  background: var(--accent);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 8px 16px;
-  border-radius: 100px;
-  box-shadow: 0 4px 15px var(--accent-glow);
-  transform: translateY(10px);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.card:hover .overlayScanText {
-  transform: translateY(0);
+  background: radial-gradient(circle at center, #ffffff 0%, #fff7ed 100%);
 }
 
 /* Card details and content */
 .cardInfo {
-  padding: 20px;
+  padding: 18px 20px 20px;
   display: flex;
   flex-direction: column;
   flex: 1;
-}
-
-.cardTitleRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
 }
 
 .cardTitle {
@@ -789,29 +681,11 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--text);
-}
-
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-}
-
-.cardBody {
-  font-size: 12.5px;
-  color: var(--text-2);
-  line-height: 1.5;
-  margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  height: 38px;
+  margin-bottom: 14px;
 }
 
 .expDetails {
+  margin-top: auto;
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -819,13 +693,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .expDetailItem {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  gap: 12px;
+  font-size: 11.5px;
 }
 
 .expDetailLabel {
@@ -835,30 +710,31 @@
 .expDetailValue {
   font-weight: 600;
   color: var(--text-2);
+  text-align: right;
 }
 
 .cardScanBtn {
-  margin-top: auto;
+  margin-top: 0;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--accent-subtle);
-  border: 1px solid rgba(249, 115, 22, 0.3);
-  color: var(--accent-light);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  border: none;
+  color: #ffffff;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
+  padding: 12px;
+  border-radius: 100px;
+  box-shadow: 0 6px 18px var(--accent-glow);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cardScanBtn:hover {
-  background: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(249, 115, 22, 0.35);
 }
 
 .cardBtnArrow {

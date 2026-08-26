@@ -236,14 +236,8 @@ export default function Home() {
         {/* AR Gallery Section */}
         <section id="ar-gallery" className={styles.gallerySection}>
           <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.sectionEyebrow}>WEBAR REPOSITORY</span>
-              <h2 className={styles.sectionTitle}>Trackable STEM Targets</h2>
-              <p className={styles.sectionSubtitle}>Scan these physical STEM diagram cards to trigger interactive video and 3D visualization overlays</p>
-            </div>
-            <div className={styles.targetCount}>
-              {demoExperiences.length} Active Modules
-            </div>
+            <h2 className={styles.galleryTitle}>Trackable STEM Targets</h2>
+            <div className={styles.targetCount}>{demoExperiences.length} Active Modules</div>
           </div>
 
           {loading ? (
@@ -252,61 +246,45 @@ export default function Home() {
               <p>Loading STEM tracking data...</p>
             </div>
           ) : (
-            <>
-              {/* Demo Targets Grid */}
-              <div className={styles.gridHeader}>
-                <h3>Official STEM Modules</h3>
-                <span className={styles.badgeDemo}>French & EC Standards</span>
-              </div>
-              <div className={styles.grid}>
-                {demoExperiences.map((exp, idx) => (
-                  <div key={idx} className={styles.card} onClick={handleLaunchDemo}>
-                    <div className={styles.cardPreviewContainer}>
-                      {exp.targetImageUrl ? (
-                        <img 
-                          src={exp.targetImageUrl} 
-                          alt={exp.cardTitle || 'STEM Target Image'} 
-                          className={styles.cardImage} 
-                        />
-                      ) : (
-                        <div className={styles.abstractPlaceholder}>
-                          <span className={styles.placeholderIcon}>◈</span>
-                        </div>
-                      )}
-                      <div className={styles.scanline} />
-                      <div className={styles.cardOverlay}>
-                        <span className={styles.overlayScanText}>Scan STEM Target</span>
-                      </div>
-                    </div>
-                    <div className={styles.cardInfo}>
-                      <div className={styles.cardTitleRow}>
-                        <h4 className={styles.cardTitle}>{exp.cardTitle || 'STEM Module'}</h4>
-                        <span className={styles.statusDot} />
-                      </div>
-                      <p className={styles.cardBody}>{exp.cardBody || 'Scan target image to unlock the STEM overlay.'}</p>
-                      
-                      <div className={styles.expDetails}>
-                        <div className={styles.expDetailItem}>
-                          <span className={styles.expDetailLabel}>Resource:</span>
-                          <span className={styles.expDetailValue}>
-                            {exp.glbModelUrl ? '3D Model + Video' : (exp.youtubeUrl ? 'Educational Stream' : 'Video Overlay')}
-                          </span>
-                        </div>
-                        <div className={styles.expDetailItem}>
-                          <span className={styles.expDetailLabel}>Action Button:</span>
-                          <span className={styles.expDetailValue}>{exp.buttonLabel || 'Learn More'}</span>
-                        </div>
-                      </div>
-
-                      <button className={styles.cardScanBtn}>
-                        <span>Launch AR Scanner</span>
-                        <span className={styles.cardBtnArrow}>→</span>
-                      </button>
-                    </div>
+            <div className={styles.grid}>
+              {demoExperiences.map((exp, idx) => (
+                <div key={idx} className={styles.card}>
+                  <div className={styles.cardImageWrap}>
+                    {exp.targetImageUrl ? (
+                      <img
+                        src={exp.targetImageUrl}
+                        alt={exp.cardTitle || 'STEM Target'}
+                        className={styles.cardImage}
+                      />
+                    ) : (
+                      <div className={styles.cardImageFallback}>◈</div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </>
+
+                  <div className={styles.cardInfo}>
+                    <h4 className={styles.cardTitle}>{exp.cardTitle || 'STEM Module'}</h4>
+
+                    <div className={styles.expDetails}>
+                      <div className={styles.expDetailItem}>
+                        <span className={styles.expDetailLabel}>Resource</span>
+                        <span className={styles.expDetailValue}>
+                          {exp.glbModelUrl ? '3D Model + Video' : (exp.youtubeUrl ? 'Educational Stream' : 'Video Overlay')}
+                        </span>
+                      </div>
+                      <div className={styles.expDetailItem}>
+                        <span className={styles.expDetailLabel}>Action Button</span>
+                        <span className={styles.expDetailValue}>{exp.buttonLabel || 'Learn More'}</span>
+                      </div>
+                    </div>
+
+                    <button className={styles.cardScanBtn} onClick={handleLaunchDemo}>
+                      <span>Launch AR Scanner</span>
+                      <span className={styles.cardBtnArrow}>→</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </section>
 
