@@ -170,7 +170,6 @@ export default function Home() {
         <section id="about" className={styles.infoSection}>
           <div className={styles.sectionHeader}>
             <div>
-              <span className={styles.sectionEyebrow}>ABOUT THE PRODUCT</span>
               <h2 className={styles.sectionTitle}>About the Product</h2>
             </div>
           </div>
