@@ -9,6 +9,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [compilingStatus, setCompilingStatus] = useState('idle') // 'idle' | 'compiling' | 'ready' | 'error'
   const [compilingProgress, setCompilingProgress] = useState(0)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [contactExpanded, setContactExpanded] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerOpen])
 
   // Fetch demo experiences
   useEffect(() => {
@@ -77,13 +84,57 @@ export default function Home() {
       {/* Header / Navbar */}
       <header className={styles.header}>
         <nav className={styles.navLinks}>
-          <a href="#about" className={styles.navLink}>About</a>
-          <a href="#offerings" className={styles.navLink}>What We Offer</a>
-          <a href="#ar-gallery" className={styles.navLink}>AR Modules</a>
-          <a href="#team" className={styles.navLink}>Team</a>
-          <a href="#contact" className={styles.navLink}>Contact</a>
+          <a href="#about" className={styles.navLink}>About the Product</a>
+          <a href="#contact" className={styles.navLink}>Contact Us</a>
         </nav>
+
+        <button
+          className={styles.hamburger}
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </header>
+
+      {/* Navigation Drawer */}
+      {drawerOpen && <div className={styles.drawerOverlay} onClick={() => setDrawerOpen(false)} />}
+      <aside className={`${styles.drawer} ${drawerOpen ? styles.drawerOpen : ''}`} aria-hidden={!drawerOpen}>
+        <div className={styles.drawerHeader}>
+          <span className={styles.drawerTitle}>Menu</span>
+          <button className={styles.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Close navigation menu">✕</button>
+        </div>
+
+        <nav className={styles.drawerNav}>
+          <a href="#about" className={styles.drawerLink} onClick={() => setDrawerOpen(false)}>
+            About the Product
+          </a>
+
+          <button
+            className={styles.drawerLink}
+            onClick={() => setContactExpanded((v) => !v)}
+            aria-expanded={contactExpanded}
+          >
+            Contact Us
+            <span className={`${styles.drawerChevron} ${contactExpanded ? styles.chevronUp : ''}`}>▾</span>
+          </button>
+
+          <div className={`${styles.contactPanel} ${contactExpanded ? styles.contactPanelOpen : ''}`}>
+            <div className={styles.contactPanelInner}>
+              <a href="tel:+33749706796" className={styles.contactItem}>
+                <span className={styles.contactItemLabel}>Phone</span>
+                <span className={styles.contactItemValue}>(+33) 749 706 796</span>
+              </a>
+              <a href="mailto:mayukh2094@gmail.com" className={styles.emailBtn}>
+                <span>Send Email</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+      </aside>
 
       <main className={styles.container}>
         {/* Hero Section */}
@@ -257,30 +308,6 @@ export default function Home() {
               </div>
             </>
           )}
-        </section>
-
-        {/* Team Section */}
-        <section id="team" className={styles.teamSection}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.sectionEyebrow}>LEADERSHIP</span>
-              <h2 className={styles.sectionTitle}>Our Team</h2>
-              <p className={styles.sectionSubtitle}>Pioneering the next era of STEM Education and Interactive WebAR</p>
-            </div>
-          </div>
-
-          <div className={styles.teamGrid}>
-            <div className={styles.teamCard}>
-              <div className={styles.teamAvatar}>MC</div>
-              <h3 className={styles.teamName}>Mayukh Chakraborty</h3>
-              <p className={styles.teamRole}>Founder & Chief Executive Officer</p>
-            </div>
-            <div className={styles.teamCard}>
-              <div className={styles.teamAvatar}>VG</div>
-              <h3 className={styles.teamName}>Valera Evgeniya Gerasimova</h3>
-              <p className={styles.teamRole}>Founder & Chief Pedagogy Officer</p>
-            </div>
-          </div>
         </section>
 
         {/* Contact Section */}

@@ -50,12 +50,12 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* Navbar links — desktop */
 .navLinks {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 28px;
+  gap: 32px;
 }
 
 .navLink {
@@ -87,6 +87,216 @@
 
 .navLink:hover::after {
   transform: scaleX(1);
+}
+
+/* Hamburger — hidden on desktop */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  transition: background 0.2s ease;
+}
+
+.hamburger:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.hamburger:hover span {
+  background: var(--accent);
+}
+
+/* Navigation Drawer */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 90;
+  animation: fadeIn 0.25s ease both;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(340px, 86vw);
+  background: #ffffff;
+  border-left: 1px solid var(--border);
+  box-shadow: -16px 0 48px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding-top: max(0px, env(safe-area-inset-top));
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawerTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.drawerClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  transition: all 0.2s ease;
+}
+
+.drawerClose:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.drawerNav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 16px;
+}
+
+.drawerLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  color: var(--text);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.drawerLink:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.drawerChevron {
+  font-size: 13px;
+  color: var(--text-3);
+  transition: transform 0.25s ease;
+}
+
+.drawerChevron.chevronUp {
+  transform: rotate(180deg);
+}
+
+.contactPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contactPanel > * {
+  min-height: 0;
+}
+
+.contactPanelOpen {
+  grid-template-rows: 1fr;
+}
+
+.contactPanelInner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease;
+}
+
+.contactItem:hover {
+  border-color: var(--accent);
+}
+
+.contactItemLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.contactItemValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.emailBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  padding: 13px 18px;
+  border-radius: 100px;
+  box-shadow: 0 8px 24px var(--accent-glow);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.emailBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(249, 115, 22, 0.35);
 }
 
 /* Main Container */
@@ -659,65 +869,6 @@
   transform: translateX(3px);
 }
 
-/* Team Section */
-.teamSection {
-  margin: 60px 0;
-}
-
-.teamGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
-}
-
-.teamCard {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px 24px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-}
-
-.teamCard:hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.12);
-}
-
-.teamAvatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent) 0%, #ea580c 100%);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 6px 16px var(--accent-glow);
-}
-
-.teamName {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-
-.teamRole {
-  font-size: 13px;
-  color: var(--accent-light);
-  font-weight: 600;
-}
-
 /* Contact Section */
 .contactSection {
   margin: 40px 0 60px;
@@ -811,8 +962,14 @@
 
 /* Media Queries for full Responsiveness */
 @media (max-width: 900px) {
+  .header {
+    justify-content: flex-end;
+  }
   .navLinks {
-    gap: 20px;
+    display: none;
+  }
+  .hamburger {
+    display: flex;
   }
   .hero {
     padding: 40px 0 60px;
@@ -836,13 +993,6 @@
   .header {
     padding: 14px 16px;
     padding-top: max(14px, env(safe-area-inset-top));
-  }
-  .navLinks {
-    gap: 6px 14px;
-  }
-  .navLink {
-    font-size: 12.5px;
-    padding: 4px 2px;
   }
   .container {
     padding: 0 20px 40px;
@@ -877,12 +1027,6 @@
 }
 
 @media (max-width: 400px) {
-  .navLinks {
-    gap: 4px 12px;
-  }
-  .navLink {
-    font-size: 11.5px;
-  }
   .title {
     font-size: 26px;
   }
