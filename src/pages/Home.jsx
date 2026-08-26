@@ -5,8 +5,6 @@ import styles from './Home.module.css'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [demoExperiences, setDemoExperiences] = useState([])
-  const [loading, setLoading] = useState(true)
   const [compilingStatus, setCompilingStatus] = useState('idle') // 'idle' | 'compiling' | 'ready' | 'error'
   const [compilingProgress, setCompilingProgress] = useState(0)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -17,60 +15,48 @@ export default function Home() {
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
 
-  // Fetch demo experiences
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const response = await fetch('/demo-experience.json', { cache: 'no-store' })
-        if (response.ok) {
-          const data = await response.json()
-          setDemoExperiences(Array.isArray(data) ? data : [data])
-        }
-      } catch (err) {
-        console.error('Failed to load demo experiences:', err)
-      }
-
-      setLoading(false)
-    }
-
-    loadData()
-  }, [])
-
   // Background targets compilation effect
   useEffect(() => {
-    if (demoExperiences.length === 0) return
-
-    const targetImageUrls = demoExperiences.map((exp) => exp.targetImageUrl).filter(Boolean)
-    if (targetImageUrls.length === 0) return
-
-    const cacheKey = targetImageUrls.join('|')
-    if (window.__arCompiledCache?.[cacheKey]) {
-      setCompilingStatus('ready')
-      return
-    }
-
     let active = true
-    setCompilingStatus('compiling')
-    setCompilingProgress(0)
 
-    compileTargetImages(targetImageUrls, (progress) => {
-      if (active) setCompilingProgress(progress)
-    })
-      .then((mindDataUrl) => {
+    async function preload() {
+      try {
+        const response = await fetch('/demo-experience.json', { cache: 'no-store' })
+        if (!response.ok) return
+        const data = await response.json()
+        const experiences = Array.isArray(data) ? data : [data]
+        const targetImageUrls = experiences.map((exp) => exp.targetImageUrl).filter(Boolean)
+        if (targetImageUrls.length === 0) return
+
+        const cacheKey = targetImageUrls.join('|')
+        if (window.__arCompiledCache?.[cacheKey]) {
+          setCompilingStatus('ready')
+          return
+        }
+
+        setCompilingStatus('compiling')
+        setCompilingProgress(0)
+
+        const mindDataUrl = await compileTargetImages(targetImageUrls, (progress) => {
+          if (active) setCompilingProgress(progress)
+        })
+
         if (!active) return
         if (!window.__arCompiledCache) window.__arCompiledCache = {}
         window.__arCompiledCache[cacheKey] = mindDataUrl
         setCompilingStatus('ready')
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Background compilation failed:', err)
         if (active) setCompilingStatus('error')
-      })
+      }
+    }
+
+    preload()
 
     return () => {
       active = false
     }
-  }, [demoExperiences])
+  }, [])
 
   const handleLaunchDemo = () => {
     navigate('/ar')
@@ -180,8 +166,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About Section */}
+        {/* About the Product Section */}
         <section id="about" className={styles.infoSection}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <span className={styles.sectionEyebrow}>ABOUT THE PRODUCT</span>
+              <h2 className={styles.sectionTitle}>About the Product</h2>
+            </div>
+          </div>
+
           <div className={styles.infoGrid}>
             <div className={styles.infoCard}>
               <div className={styles.infoIcon}>📚</div>
@@ -194,7 +187,7 @@ export default function Home() {
               <div className={styles.infoIcon}>🎮</div>
               <h3 className={styles.infoCardTitle}>Interactive Media & WebAR</h3>
               <p className={styles.infoCardBody}>
-                Access low-graphics interactive games, Webtoons, interactive media, and 3D visual models embedded directly into target image scans.
+                Access low-graphics interactive games, Webtoons, interactive media, and 3D visual models delivered through WebAR experiences.
               </p>
             </div>
             <div className={styles.infoCard}>
@@ -205,112 +198,54 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </section>
 
-        {/* Offerings Section */}
-        <section id="offerings" className={styles.offeringsSection}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.sectionEyebrow}>WHAT WE OFFER</span>
-              <h2 className={styles.sectionTitle}>Cloud Based Console for STEM</h2>
+          {/* Offerings */}
+          <div className={styles.offeringsSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <span className={styles.sectionEyebrow}>WHAT WE OFFER</span>
+                <h2 className={styles.sectionTitle}>Cloud Based Console for STEM</h2>
+              </div>
+            </div>
+
+            <div className={styles.offeringsGrid}>
+              <div className={styles.offeringPill}>
+                <span className={styles.offeringBadge}>Gaming</span>
+                <h4>Low-Graphics Interactive Media</h4>
+                <p>Limited level interactive games catering directly to subject material for STEM.</p>
+              </div>
+              <div className={styles.offeringPill}>
+                <span className={styles.offeringBadge}>Webtoons</span>
+                <h4>Theoretical Concepts & History</h4>
+                <p>Historical accounts and theoretical concepts crafted into captivating webtoons that make science interesting.</p>
+              </div>
+              <div className={styles.offeringPill}>
+                <span className={styles.offeringBadge}>Interactive Media & Series</span>
+                <h4>Films & Visual Series</h4>
+                <p>Published stories and series on STEM designed for instant relevance in physics, chemistry, and mathematics.</p>
+              </div>
             </div>
           </div>
 
-          <div className={styles.offeringsGrid}>
-            <div className={styles.offeringPill}>
-              <span className={styles.offeringBadge}>Gaming</span>
-              <h4>Low-Graphics Interactive Media</h4>
-              <p>Limited level interactive games catering directly to subject material for STEM.</p>
-            </div>
-            <div className={styles.offeringPill}>
-              <span className={styles.offeringBadge}>Webtoons</span>
-              <h4>Theoretical Concepts & History</h4>
-              <p>Historical accounts and theoretical concepts crafted into captivating webtoons that make science interesting.</p>
-            </div>
-            <div className={styles.offeringPill}>
-              <span className={styles.offeringBadge}>Interactive Media & Series</span>
-              <h4>Films & Visual Series</h4>
-              <p>Published stories and series on STEM designed for instant relevance in physics, chemistry, and mathematics.</p>
-            </div>
-          </div>
-        </section>
+          {/* Contact */}
+          <div id="contact" className={styles.contactSection}>
+            <div className={styles.contactCard}>
+              <h2 className={styles.contactTitle}>Reach out to us</h2>
+              <p className={styles.contactSub}>If you have any questions regarding our STEM Education or WebAR modules</p>
 
-        {/* AR Gallery Section */}
-        <section id="ar-gallery" className={styles.gallerySection}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <h2 className={styles.galleryTitle}>Trackable STEM Targets</h2>
-              <p className={styles.gallerySubtitle}>Scan these physical STEM diagram cards to trigger interactive video and 3D visualization overlays</p>
-            </div>
-            <div className={styles.targetCount}>{demoExperiences.length} Active Modules</div>
-          </div>
-
-          {loading ? (
-            <div className={styles.loadingSpinner}>
-              <div className={styles.spinner} />
-              <p>Loading STEM tracking data...</p>
-            </div>
-          ) : (
-            <div className={styles.grid}>
-              {demoExperiences.map((exp, idx) => (
-                <div key={idx} className={styles.card}>
-                  <div className={styles.cardImageWrap}>
-                    {exp.targetImageUrl ? (
-                      <img
-                        src={exp.targetImageUrl}
-                        alt={exp.cardTitle || 'STEM Target'}
-                        className={styles.cardImage}
-                      />
-                    ) : (
-                      <div className={styles.cardImageFallback}>◈</div>
-                    )}
-                  </div>
-
-                  <div className={styles.cardInfo}>
-                    <h4 className={styles.cardTitle}>{exp.cardTitle || 'STEM Module'}</h4>
-
-                    <div className={styles.expDetails}>
-                      <div className={styles.expDetailItem}>
-                        <span className={styles.expDetailLabel}>Resource</span>
-                        <span className={styles.expDetailValue}>
-                          {exp.glbModelUrl ? '3D Model + Video' : (exp.youtubeUrl ? 'Educational Stream' : 'Video Overlay')}
-                        </span>
-                      </div>
-                      <div className={styles.expDetailItem}>
-                        <span className={styles.expDetailLabel}>Action Button</span>
-                        <span className={styles.expDetailValue}>{exp.buttonLabel || 'Learn More'}</span>
-                      </div>
-                    </div>
-
-                    <button className={styles.cardScanBtn} onClick={handleLaunchDemo}>
-                      <span>Launch AR Scanner</span>
-                      <span className={styles.cardBtnArrow}>→</span>
-                    </button>
-                  </div>
+              <div className={styles.contactGrid}>
+                <div className={styles.contactItem}>
+                  <span className={styles.contactLabel}>Phone</span>
+                  <a href="tel:+33749706796" className={styles.contactValue}>(+33) 749 706 796</a>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Contact Section */}
-        <section id="contact" className={styles.contactSection}>
-          <div className={styles.contactCard}>
-            <h2 className={styles.contactTitle}>Reach out to us</h2>
-            <p className={styles.contactSub}>If you have any questions regarding our STEM Education or WebAR modules</p>
-            
-            <div className={styles.contactGrid}>
-              <div className={styles.contactItem}>
-                <span className={styles.contactLabel}>Phone</span>
-                <a href="tel:+33749706796" className={styles.contactValue}>(+33) 749 706 796</a>
-              </div>
-              <div className={styles.contactItem}>
-                <span className={styles.contactLabel}>Email</span>
-                <a href="mailto:mayukh2094@gmail.com" className={styles.contactValue}>mayukh2094@gmail.com</a>
-              </div>
-              <div className={styles.contactItem}>
-                <span className={styles.contactLabel}>Location</span>
-                <span className={styles.contactValue}>France / European Union</span>
+                <div className={styles.contactItem}>
+                  <span className={styles.contactLabel}>Email</span>
+                  <a href="mailto:mayukh2094@gmail.com" className={styles.contactValue}>mayukh2094@gmail.com</a>
+                </div>
+                <div className={styles.contactItem}>
+                  <span className={styles.contactLabel}>Location</span>
+                  <span className={styles.contactValue}>France / European Union</span>
+                </div>
               </div>
             </div>
           </div>
@@ -323,4 +258,3 @@ export default function Home() {
     </div>
   )
 }
-
