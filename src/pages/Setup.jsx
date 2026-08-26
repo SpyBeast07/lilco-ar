@@ -139,10 +139,6 @@ export default function Setup() {
       <div className={styles.noise} />
 
       <header className={styles.header}>
-        <div className={styles.logo}>
-          <span className={styles.logoBadge}>LILCO</span>
-          <span className={styles.logoText}>STEM AR Studio</span>
-        </div>
         <div className={styles.badge}>Creator Portal</div>
       </header>
 

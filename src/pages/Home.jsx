@@ -104,11 +104,6 @@ export default function Home() {
 
       {/* Header / Navbar */}
       <header className={styles.header}>
-        <div className={styles.logo}>
-          <span className={styles.logoBadge}>LILCO</span>
-          <span className={styles.logoText}>STEM AR Studio</span>
-        </div>
-
         <nav className={styles.navLinks}>
           <a href="#about" className={styles.navLink}>About</a>
           <a href="#offerings" className={styles.navLink}>What We Offer</a>
@@ -116,13 +111,6 @@ export default function Home() {
           <a href="#team" className={styles.navLink}>Team</a>
           <a href="#contact" className={styles.navLink}>Contact</a>
         </nav>
-
-        <div className={styles.headerActions}>
-          <button className={styles.setupBtn} onClick={() => navigate('/setup')}>
-            <span>Create Experience</span>
-            <span className={styles.plusIcon}>+</span>
-          </button>
-        </div>
       </header>
 
       <main className={styles.container}>
