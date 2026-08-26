@@ -13,7 +13,9 @@ export default function About() {
 
       {/* Header / Navbar */}
       <header className={styles.header}>
-        <Link to="/" className={styles.navLogo} aria-label="Lilco — Home">Lilco</Link>
+        <Link to="/" className={styles.navLogo} aria-label="Lilco — Home">
+          <img src="/lilco-logo.png" alt="Lilco" className={styles.logoImg} />
+        </Link>
 
         <nav className={styles.navLinks}>
           <Link to="/" className={styles.navLink}>Home</Link>
