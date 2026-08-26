@@ -173,10 +173,6 @@
   color: var(--text);
 }
 
-.brandTitle {
-  color: var(--accent);
-}
-
 .gradientText {
   background: linear-gradient(135deg, var(--accent) 0%, #c2410c 100%);
   -webkit-background-clip: text;

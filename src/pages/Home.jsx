@@ -108,11 +108,11 @@ export default function Home() {
             )}
           </div>
           <h1 className={styles.title}>
-            Hello, We are <span className={styles.brandTitle}>LilCo</span>!<br />
-            Your Repository for <span className={styles.gradientText}>STEM Education</span>
+            Welcome to the Future of<br />
+            <span className={styles.gradientText}>STEM Education</span>
           </h1>
           <p className={styles.subtitle}>
-            LilCo brings a new paradigm to STEM Education. Like a streaming platform for your STEM resources, explore interactive WebAR target modules across Middle School, High School, and University curricula.
+            Discover a new paradigm in STEM Education. Like a streaming platform for your STEM resources, explore interactive WebAR target modules across Middle School, High School, and University curricula.
           </p>
 
           <div className={styles.heroCtaGroup}>
@@ -135,7 +135,7 @@ export default function Home() {
               <div className={styles.infoIcon}>📚</div>
               <h3 className={styles.infoCardTitle}>Streaming STEM Platform</h3>
               <p className={styles.infoCardBody}>
-                LilCo is like a streaming service for your STEM Education resources. Find key resources for Middle School, High School, and University levels.
+                A streaming-style platform for your STEM Education resources. Find key resources for Middle School, High School, and University levels.
               </p>
             </div>
             <div className={styles.infoCard}>
@@ -205,7 +205,7 @@ export default function Home() {
             <>
               {/* Demo Targets Grid */}
               <div className={styles.gridHeader}>
-                <h3>Official LilCo STEM Modules</h3>
+                <h3>Official STEM Modules</h3>
                 <span className={styles.badgeDemo}>French & EC Standards</span>
               </div>
               <div className={styles.grid}>
@@ -230,7 +230,7 @@ export default function Home() {
                     </div>
                     <div className={styles.cardInfo}>
                       <div className={styles.cardTitleRow}>
-                        <h4 className={styles.cardTitle}>{exp.cardTitle || 'LilCo STEM Module'}</h4>
+                        <h4 className={styles.cardTitle}>{exp.cardTitle || 'STEM Module'}</h4>
                         <span className={styles.statusDot} />
                       </div>
                       <p className={styles.cardBody}>{exp.cardBody || 'Scan target image to unlock the STEM overlay.'}</p>
@@ -288,7 +288,7 @@ export default function Home() {
         <section id="contact" className={styles.contactSection}>
           <div className={styles.contactCard}>
             <h2 className={styles.contactTitle}>Reach out to us</h2>
-            <p className={styles.contactSub}>If you have any questions regarding LilCo STEM Education or WebAR modules</p>
+            <p className={styles.contactSub}>If you have any questions regarding our STEM Education or WebAR modules</p>
             
             <div className={styles.contactGrid}>
               <div className={styles.contactItem}>
@@ -309,7 +309,7 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        <p>© Copyright 2024–2026 LILCO. All rights reserved. STEM Education & AR Platform.</p>
+        <p>© Copyright 2024–2026. All rights reserved. STEM Education & AR Platform.</p>
       </footer>
     </div>
   )

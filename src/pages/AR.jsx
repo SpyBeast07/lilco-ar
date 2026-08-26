@@ -1061,7 +1061,7 @@ export default function AR() {
 
       {status === 'ready' && (
         <header className={styles.topBar}>
-          <span className={styles.topLogo}>LILCO STEM AR</span>
+          <span className={styles.topLogo}>STEM AR</span>
           <div className={`${styles.trackBadge} ${tracked ? styles.trackBadgeActive : ''}`}>
             <span className={styles.trackDot} />
             <span>{tracked ? 'Target Locked' : 'Searching Target'}</span>
