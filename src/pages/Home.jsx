@@ -83,6 +83,8 @@ export default function Home() {
 
       {/* Header / Navbar */}
       <header className={styles.header}>
+        <a href="/" className={styles.navLogo} aria-label="AR Studio — Home">AR Studio</a>
+
         <nav className={styles.navLinks}>
           <a href="#about" className={styles.navLink}>About the Product</a>
           <a href="#contact" className={styles.navLink}>Contact Us</a>
@@ -236,7 +238,10 @@ export default function Home() {
         {/* AR Gallery Section */}
         <section id="ar-gallery" className={styles.gallerySection}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.galleryTitle}>Trackable STEM Targets</h2>
+            <div>
+              <h2 className={styles.galleryTitle}>Trackable STEM Targets</h2>
+              <p className={styles.gallerySubtitle}>Scan these physical STEM diagram cards to trigger interactive video and 3D visualization overlays</p>
+            </div>
             <div className={styles.targetCount}>{demoExperiences.length} Active Modules</div>
           </div>
 
