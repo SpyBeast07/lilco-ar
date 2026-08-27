@@ -11,6 +11,7 @@
   {
     "targetImageUrl": "/Double Pendulum.png",
     "youtubeUrl": "https://youtube.com/shorts/K03Anklea_o?feature=share",
+    "glbModelUrl": "/double_pendulum.glb",
     "cardTitle": "Double Pendulum",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -75,6 +76,7 @@
   {
     "targetImageUrl": "/Principal of Conservation of Momentum.png",
     "youtubeUrl": "https://youtube.com/shorts/KhDjo6rLF30?feature=share",
+    "glbModelUrl": "/newtons_cradle.glb",
     "cardTitle": "Principal of Conservation of Momentum",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { AmbientLight, Box3, DirectionalLight, Group, HemisphereLight, Vector3 } from 'three'
+import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Group, HemisphereLight, LoopRepeat, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
@@ -384,6 +384,7 @@ async function createTargetMedia(exp) {
 // carries non-uniform node scales (e.g. the exported FBX/Box chains), and
 // baking them into geometry would leave those node scales applied on top,
 // producing a wildly oversized, mispositioned model.
+// Returns { model, mixer } where mixer has all animations playing.
 function loadGlbModel(url) {
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader()
@@ -404,7 +405,16 @@ function loadGlbModel(url) {
           model.position.sub(center).multiplyScalar(scale)
           model.scale.multiplyScalar(scale)
 
-          resolve(model)
+          // Create animation mixer and play all animations
+          const mixer = new AnimationMixer(model)
+          gltf.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip)
+            action.setLoop(LoopRepeat, Infinity)
+            action.clampWhenFinished = true
+            action.play()
+          })
+
+          resolve({ model, mixer })
         } catch (err) {
           reject(err)
         }
@@ -802,9 +812,10 @@ export default function AR() {
           // cannot tilt it — see updateModelTransforms. Using position/scale on
           // the wrapper keeps the model's own node-scale normalization intact.
           let modelGroup = null
+          let modelMixer = null
           if (experience.glbModelUrl) {
             try {
-              const model = await loadGlbModel(experience.glbModelUrl)
+              const { model, mixer } = await loadGlbModel(experience.glbModelUrl)
               if (cancelled) {
                 disposeGlbModel(model)
                 mindarRef.current.stop()
@@ -814,6 +825,7 @@ export default function AR() {
               modelGroup.add(model)
               modelGroup.visible = false
               scene.add(modelGroup)
+              modelMixer = mixer
             } catch (err) {
               console.warn('GLB model failed to load', experience.glbModelUrl, err)
               modelGroup = null
@@ -827,6 +839,7 @@ export default function AR() {
             media,
             mediaPromise: null,
             modelGroup,
+            modelMixer,
             anchor,
           }
           anchorSetups.push(setup)
@@ -955,9 +968,22 @@ export default function AR() {
           }
         }
 
-        renderer.setAnimationLoop(() => {
+        let prevTime = 0
+        renderer.setAnimationLoop((time) => {
+          const delta = (time - prevTime) / 1000
+          prevTime = time
+
           runArbitration()
           updateModelTransforms()
+
+          // Update animation mixers
+          for (let i = 0; i < anchorSetups.length; i += 1) {
+            const setup = anchorSetups[i]
+            if (setup.modelMixer) {
+              setup.modelMixer.update(delta)
+            }
+          }
+
           renderer.render(scene, camera)
           cssRenderer.render(scene, camera)
         })
@@ -999,6 +1025,12 @@ export default function AR() {
           try {
             setup.modelGroup.parent?.remove(setup.modelGroup)
             disposeGlbModel(setup.modelGroup)
+          } catch (_) {}
+        }
+        if (setup.modelMixer) {
+          try {
+            setup.modelMixer.uncacheRoot(setup.modelMixer.getRoot())
+            setup.modelMixer.stopAllAction()
           } catch (_) {}
         }
       })
