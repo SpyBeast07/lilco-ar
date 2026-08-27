@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Group, HemisphereLight, LoopRepeat, Vector3 } from 'three'
+import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Euler, Group, HemisphereLight, LoopRepeat, MathUtils, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
@@ -813,6 +813,8 @@ export default function AR() {
           // the wrapper keeps the model's own node-scale normalization intact.
           let modelGroup = null
           let modelMixer = null
+          let modelCustomRotation = null
+          let modelCustomPosition = null
           if (experience.glbModelUrl) {
             try {
               const { model, mixer } = await loadGlbModel(experience.glbModelUrl)
@@ -826,6 +828,18 @@ export default function AR() {
               modelGroup.visible = false
               scene.add(modelGroup)
               modelMixer = mixer
+
+              // Apply custom position and rotation from config (degrees -> radians)
+              const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
+              const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
+              modelCustomRotation = new Euler(
+                MathUtils.degToRad(rot.x),
+                MathUtils.degToRad(rot.y),
+                MathUtils.degToRad(rot.z)
+              )
+              modelCustomPosition = new Vector3(pos.x, pos.y, pos.z)
+              modelGroup.position.copy(modelCustomPosition)
+              modelGroup.rotation.copy(modelCustomRotation)
             } catch (err) {
               console.warn('GLB model failed to load', experience.glbModelUrl, err)
               modelGroup = null
@@ -840,6 +854,8 @@ export default function AR() {
             mediaPromise: null,
             modelGroup,
             modelMixer,
+            modelCustomRotation,
+            modelCustomPosition,
             anchor,
           }
           anchorSetups.push(setup)
@@ -950,9 +966,8 @@ export default function AR() {
 
         // Keeps every 3D diagram standing upright regardless of how the card is
         // held. Each frame it re-positions each model at its marker's world spot
-        // but forces an identity (upright, camera-aligned) rotation and a scale
-        // matching the marker's world size. The model itself keeps its own
-        // normalized node transform inside the wrapper group.
+        // but applies the custom rotation from config. The model itself keeps its
+        // own normalized node transform inside the wrapper group.
         const modelPos = new Vector3()
         const modelScaleAxis = new Vector3()
         const updateModelTransforms = () => {
@@ -962,9 +977,21 @@ export default function AR() {
             const anchorMatrix = setup.anchor.group.matrix
             modelPos.setFromMatrixPosition(anchorMatrix)
             modelScaleAxis.setFromMatrixScale(anchorMatrix)
-            setup.modelGroup.position.copy(modelPos)
+
+            // Apply marker world position + custom offset
+            if (setup.modelCustomPosition) {
+              setup.modelGroup.position.copy(modelPos).add(setup.modelCustomPosition)
+            } else {
+              setup.modelGroup.position.copy(modelPos)
+            }
             setup.modelGroup.scale.setScalar(modelScaleAxis.x)
-            setup.modelGroup.rotation.set(0, 0, 0)
+
+            // Apply custom rotation from config (instead of identity)
+            if (setup.modelCustomRotation) {
+              setup.modelGroup.rotation.copy(setup.modelCustomRotation)
+            } else {
+              setup.modelGroup.rotation.set(0, 0, 0)
+            }
           }
         }
 
