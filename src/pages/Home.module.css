@@ -449,8 +449,20 @@
   box-shadow: 0 14px 35px rgba(249, 115, 22, 0.4);
 }
 
+.ctaButton:disabled:hover {
+  background: var(--accent);
+  transform: none;
+  box-shadow: 0 10px 25px var(--accent-glow);
+}
+
 .ctaButton:active {
   transform: translateY(0) scale(0.98);
+}
+
+.ctaButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .ctaArrow {

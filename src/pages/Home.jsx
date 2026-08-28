@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { compileTargetImages, getCachedTarget, buildStableCacheKey } from './AR.jsx'
+import { compileTargetImages, getCachedTarget, setCachedTarget, buildStableCacheKey } from './AR.jsx'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -170,7 +170,13 @@ export default function Home() {
           </p>
 
           <div className={styles.heroCtaGroup}>
-            <button className={styles.ctaButton} onClick={handleLaunchDemo}>
+            <button
+              className={styles.ctaButton}
+              onClick={handleLaunchDemo}
+              disabled={compilingStatus !== 'ready'}
+              aria-disabled={compilingStatus !== 'ready'}
+              title={compilingStatus !== 'ready' ? 'Waiting for WebAR Engine to be ready...' : 'Launch AR Scanner'}
+            >
               <span className={styles.ctaIcon}>📸</span>
               <span>Launch AR Scanner</span>
               <span className={styles.ctaArrow}>→</span>

@@ -548,7 +548,7 @@ export async function getCachedTarget(key) {
   }
 }
 
-async function setCachedTarget(key, val) {
+export async function setCachedTarget(key, val) {
   try {
     const db = await getDB()
     await new Promise((resolve, reject) => {
