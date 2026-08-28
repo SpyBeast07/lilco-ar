@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { compileTargetImages } from './AR.jsx'
+import { compileTargetImages, getCachedTarget, buildStableCacheKey } from './AR.jsx'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -28,12 +28,25 @@ export default function Home() {
         const targetImageUrls = experiences.map((exp) => exp.targetImageUrl).filter(Boolean)
         if (targetImageUrls.length === 0) return
 
-        const cacheKey = targetImageUrls.join('|')
+        const cacheKey = buildStableCacheKey(targetImageUrls)
+
+        // 1. Check in-memory cache (fastest — same JS session)
         if (window.__arCompiledCache?.[cacheKey]) {
           setCompilingStatus('ready')
           return
         }
 
+        // 2. Check IndexedDB persistent cache (survives reloads)
+        const cached = await getCachedTarget(cacheKey)
+        if (cached) {
+          console.log('[AR Cache] IndexedDB hit ✓ (Home page)')
+          if (!window.__arCompiledCache) window.__arCompiledCache = {}
+          window.__arCompiledCache[cacheKey] = cached
+          setCompilingStatus('ready')
+          return
+        }
+
+        // 3. Cache miss — compile and store
         setCompilingStatus('compiling')
         setCompilingProgress(0)
 
@@ -44,6 +57,7 @@ export default function Home() {
         if (!active) return
         if (!window.__arCompiledCache) window.__arCompiledCache = {}
         window.__arCompiledCache[cacheKey] = mindDataUrl
+        setCachedTarget(cacheKey, mindDataUrl)
         setCompilingStatus('ready')
       } catch (err) {
         console.error('Background compilation failed:', err)

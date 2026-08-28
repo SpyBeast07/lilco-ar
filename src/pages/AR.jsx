@@ -518,7 +518,7 @@ function getDB() {
  * We strip the origin and query-string and sort so the key is identical on both
  * web (http://localhost:5173) and Android (capacitor://localhost).
  */
-function buildStableCacheKey(targetImageUrls) {
+export function buildStableCacheKey(targetImageUrls) {
   const paths = targetImageUrls.map((url) => {
     try {
       const parsed = new URL(url, window.location.href)
@@ -532,7 +532,7 @@ function buildStableCacheKey(targetImageUrls) {
   return [...paths].sort().join('|')
 }
 
-async function getCachedTarget(key) {
+export async function getCachedTarget(key) {
   try {
     const db = await getDB()
     return await new Promise((resolve, reject) => {
