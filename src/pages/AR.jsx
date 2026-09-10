@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Euler, Group, HemisphereLight, LoopRepeat, MathUtils, Vector3 } from 'three'
+import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Euler, Group, HemisphereLight, LoopRepeat, MathUtils, Quaternion, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
@@ -815,6 +815,7 @@ export default function AR() {
           let modelMixer = null
           let modelCustomRotation = null
           let modelCustomPosition = null
+          let modelCustomScale = 1
           if (experience.glbModelUrl) {
             try {
               const { model, mixer } = await loadGlbModel(experience.glbModelUrl)
@@ -829,15 +830,18 @@ export default function AR() {
               scene.add(modelGroup)
               modelMixer = mixer
 
-              // Apply custom position and rotation from config (degrees -> radians)
+              // Apply custom position, rotation (degrees -> radians), and scale
+              // from config. Scale is a percentage change: 80 -> 1.8x, -110 -> -0.1x.
               const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
               const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
+              const scalePct = experience.modelScale != null ? experience.modelScale : 0
               modelCustomRotation = new Euler(
                 MathUtils.degToRad(rot.x),
                 MathUtils.degToRad(rot.y),
                 MathUtils.degToRad(rot.z)
               )
               modelCustomPosition = new Vector3(pos.x, pos.y, pos.z)
+              modelCustomScale = 1 + scalePct / 100
               modelGroup.position.copy(modelCustomPosition)
               modelGroup.rotation.copy(modelCustomRotation)
             } catch (err) {
@@ -856,6 +860,7 @@ export default function AR() {
             modelMixer,
             modelCustomRotation,
             modelCustomPosition,
+            modelCustomScale,
             anchor,
           }
           anchorSetups.push(setup)
@@ -970,21 +975,29 @@ export default function AR() {
         // own normalized node transform inside the wrapper group.
         const modelPos = new Vector3()
         const modelScaleAxis = new Vector3()
+        const modelOffset = new Vector3()
+        const anchorQuat = new Quaternion()
         const updateModelTransforms = () => {
           for (let i = 0; i < anchorSetups.length; i += 1) {
             const setup = anchorSetups[i]
             if (!setup.modelGroup) continue
-            const anchorMatrix = setup.anchor.group.matrix
+            const anchorGroup = setup.anchor.group
+            const anchorMatrix = anchorGroup.matrix
             modelPos.setFromMatrixPosition(anchorMatrix)
             modelScaleAxis.setFromMatrixScale(anchorMatrix)
+            anchorGroup.getWorldQuaternion(anchorQuat)
 
-            // Apply marker world position + custom offset
+            // Apply marker world position + custom offset rotated into marker-local space
             if (setup.modelCustomPosition) {
-              setup.modelGroup.position.copy(modelPos).add(setup.modelCustomPosition)
+              modelOffset.copy(setup.modelCustomPosition).applyQuaternion(anchorQuat)
+              setup.modelGroup.position.copy(modelPos).add(modelOffset)
             } else {
               setup.modelGroup.position.copy(modelPos)
             }
-            setup.modelGroup.scale.setScalar(modelScaleAxis.x)
+
+            // Combine distance-based scale from anchor with custom scale from config
+            const customScale = setup.modelCustomScale != null ? setup.modelCustomScale : 1
+            setup.modelGroup.scale.setScalar(modelScaleAxis.x * customScale)
 
             // Apply custom rotation from config (instead of identity)
             if (setup.modelCustomRotation) {
