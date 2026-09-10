@@ -2,7 +2,7 @@
   {
     "targetImageUrl": "/Chemical Bonding & Molecular Orbital.png",
     "youtubeUrl": "https://youtube.com/shorts/j67uvRFzGOk?feature=share",
-    "glbModelUrl": "/chemical_reaction.glb",
+    "glbModelUrl": "/chemical_bonding.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
     "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Chemical Bonding & Molecular Orbital",
@@ -24,6 +24,9 @@
   {
     "targetImageUrl": "/Wave Particle Duality.png",
     "youtubeUrl": "https://youtube.com/shorts/QDZlnmsxwiU?feature=share",
+    "glbModelUrl": "/wave_particle.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Wave Particle Duality",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -40,6 +43,9 @@
   {
     "targetImageUrl": "/Photoelectric Effect.png",
     "youtubeUrl": "https://youtube.com/shorts/jXMRmQla-GE?feature=share",
+    "glbModelUrl": "/photoelectric1.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Photoelectric Effect",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -56,6 +62,9 @@
   {
     "targetImageUrl": "/Konigsberg Bridge.png",
     "youtubeUrl": "https://youtube.com/shorts/S76P5MigK2M?feature=share",
+    "glbModelUrl": "/konigsberg_bridge.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Konigsberg Bridge",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -64,6 +73,9 @@
   {
     "targetImageUrl": "/Maxwell's Demon.png",
     "youtubeUrl": "https://youtu.be/avI71WYP08k",
+    "glbModelUrl": "/maxwell_demon.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Maxwell's Demon",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -72,6 +84,9 @@
   {
     "targetImageUrl": "/Quantum Constellation.png",
     "youtubeUrl": "https://youtube.com/shorts/Bw38jYBLAmE?feature=share",
+    "glbModelUrl": "/quantum_constellation.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "cardTitle": "Quantum Constellation",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
@@ -80,7 +95,7 @@
   {
     "targetImageUrl": "/Principal of Conservation of Momentum.png",
     "youtubeUrl": "https://youtube.com/shorts/KhDjo6rLF30?feature=share",
-    "glbModelUrl": "/newtons_cradle.glb",
+    "glbModelUrl": "/momentum_conservation.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
     "modelRotation": { "x": 15, "y": 60, "z": 0 },
     "cardTitle": "Principal of Conservation of Momentum",
