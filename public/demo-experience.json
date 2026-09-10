@@ -8,7 +8,7 @@
     "modelScale": 100,
     "cardTitle": "Chemical Bonding & Molecular Orbital",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/O192jrR80oo?si=jst7iColY0d_MenX"
   },
   {
@@ -20,7 +20,7 @@
     "modelScale": 0,
     "cardTitle": "Double Pendulum",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/fZKrUgm9R1o?si=FJeLalRaQveATbxb"
   },
   {
@@ -32,7 +32,7 @@
     "modelScale": 100,
     "cardTitle": "Wave Particle Duality",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/Ey25vULQ6YM?si=86mBzyZCUXjhaXQt"
   },
   {
@@ -41,7 +41,7 @@
     "modelScale": 0,
     "cardTitle": "General Relativity Concept",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/bFGiQEEvh18?si=Z6yVROHebp07ar-J"
   },
   {
@@ -53,7 +53,7 @@
     "modelScale": 150,
     "cardTitle": "Photoelectric Effect",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/byEaU9ILHmw?si=ZmPOiMa94yD-m0Gx"
   },
   {
@@ -62,7 +62,7 @@
     "modelScale": 0,
     "cardTitle": "Laplace Demon",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch Tedx Talks Video",
     "buttonUrl": "https://youtu.be/y4tItkTpBsg?si=l9VE1xrG-CrZxhzb"
   },
   {
@@ -74,7 +74,7 @@
     "modelScale": 80,
     "cardTitle": "Konigsberg Bridge",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch Ted-Ed Video",
     "buttonUrl": "https://youtu.be/nZwSo4vfw6c?si=hGrYeE5iWbc5G7AE"
   },
   {
@@ -86,7 +86,7 @@
     "modelScale": 150,
     "cardTitle": "Maxwell's Demon",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/8kcvyoHsXrw?si=do84SKC8La_BtODs"
   },
   {
@@ -98,7 +98,7 @@
     "modelScale": 100,
     "cardTitle": "Quantum Constellation",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/lZ3bPUKo5zc?si=MqZUSTQbHCjwiGAe"
   },
   {
@@ -110,7 +110,7 @@
     "modelScale": 50,
     "cardTitle": "Principal of Conservation of Momentum",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/1GvCIlHihEA?si=B24trae7vpwE1F_l"
   },
   {
@@ -119,10 +119,10 @@
     "glbModelUrl": "/grime_dice.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
     "modelRotation": { "x": 0, "y": 0, "z": 0 },
-    "modelScale": 0,
+    "modelScale": 80,
     "cardTitle": "Grime Dice",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Check Research Paper",
     "buttonUrl": "https://www.singingbanana.com/dice/article.htm"
   },
   {
@@ -134,7 +134,7 @@
     "modelScale": 0,
     "cardTitle": "John Conway's Game of Life",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
-    "buttonLabel": "Visit Website",
+    "buttonLabel": "Check Research Paper",
     "buttonUrl": "https://www.ibiblio.org/lifepatterns/october1970.html"
   }
 ]
