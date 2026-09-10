@@ -112,5 +112,29 @@
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Visit Website",
     "buttonUrl": "https://youtu.be/1GvCIlHihEA?si=B24trae7vpwE1F_l"
+  },
+  {
+    "targetImageUrl": "/Grime Dice.png",
+    "youtubeUrl": "https://youtu.be/u4XNL-uo520?si=xWhn1u9-_6W__28S",
+    "glbModelUrl": "/grime_dice.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
+    "modelScale": 0,
+    "cardTitle": "Grime Dice",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://www.singingbanana.com/dice/article.htm"
+  },
+  {
+    "targetImageUrl": "/Conway's Game of Life.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Hf729KBYN10",
+    "glbModelUrl": "/Conway_life.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
+    "modelScale": 0,
+    "cardTitle": "John Conway's Game of Life",
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Visit Website",
+    "buttonUrl": "https://www.ibiblio.org/lifepatterns/october1970.html"
   }
 ]
