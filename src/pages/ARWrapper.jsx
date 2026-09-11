@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { App } from '@capacitor/app'
 import AR from './AR.jsx'
 import styles from './ARWrapper.module.css'
 
@@ -12,6 +11,7 @@ export default function ARWrapper() {
 
     async function setupBackListener() {
       try {
+        const { App } = await import('@capacitor/app')
         backListener = await App.addListener('backButton', () => {
           navigate('/')
         })

@@ -5,12 +5,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:check": "node scripts/check-target-artifact.mjs && npm run build && node scripts/check-build-budgets.mjs",
+    "assets:report": "node scripts/report-assets.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.4",
     "@capacitor/app": "^8.1.0",
-    "@capacitor/cli": "^7.6.5",
     "@capacitor/core": "^8.3.4",
     "mind-ar": "^1.1.5",
     "react": "^18.3.1",
@@ -19,6 +19,8 @@
     "three": "0.151.3"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
     "@vitejs/plugin-react": "4.3.1",
     "vite": "5.3.1"
   }

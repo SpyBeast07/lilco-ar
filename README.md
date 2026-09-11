@@ -106,6 +106,17 @@ This application adopts the official **LilCo Signature Orange and Crisp White/Da
    npx cap run android
    ```
 
+## AR initialization contract
+
+The default scanner uses `public/demo-experience.mind`, precompiled with MindAR 1.1.5 from the ordered postcard images at a maximum dimension of 1024 pixels. This keeps target compilation off the startup path without changing detector inputs or settings.
+
+- Run `npm run build:check` before release. It rejects stale or reordered target inputs, a mismatched `.mind` artifact, missing offline scanner assets, and an initial JavaScript bundle above 80 KiB gzip.
+- When a postcard image or its order changes, regenerate the `.mind` file with MindAR 1.1.5 and update `scripts/demo-target-manifest.json` plus `targetSetVersion` together.
+- Source postcard PNGs remain in `public` for local development and regeneration, but the production build excludes them because the scanner consumes the compiled target artifact.
+- The build also excludes the currently unreferenced `photoelectric2.glb` and `Schrodinger's Cat.png`; they remain in the repository until their ownership is resolved.
+- Custom experience configs should provide `mindTargetUrl`, `targetAspectRatio`, and `targetSetVersion`. Legacy `mindDataUrl` and runtime `targetImageUrl` compilation remain supported.
+- Video players are created only after their target is detected. GLBs remain bundled for offline use but are parsed only after the user selects the 3D mode.
+
 ---
 
 ## 📄 License & Attribution

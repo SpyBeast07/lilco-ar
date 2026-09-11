@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './ARCard.module.css'
 
-export default function ARCard({ config, visible, mode = '2d', onToggleMode }) {
+export default function ARCard({ config, visible, mode = '2d', modelLoading = false, onToggleMode }) {
   const [mounted, setMounted] = useState(false)
   const mountedRef = useRef(false)
   const hasModel = Boolean(config?.glbModelUrl)
@@ -48,8 +48,9 @@ export default function ARCard({ config, visible, mode = '2d', onToggleMode }) {
               type="button"
               className={`${styles.modeBtn} ${mode === '3d' ? styles.modeBtnActive : ''}`}
               onClick={() => onToggleMode && onToggleMode('3d')}
+              disabled={modelLoading}
             >
-              3D Diagram
+              {modelLoading ? 'Loading 3D…' : '3D Diagram'}
             </button>
           </div>
         )}

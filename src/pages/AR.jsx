@@ -1,28 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { AmbientLight, AnimationMixer, Box3, DirectionalLight, Euler, Group, HemisphereLight, LoopRepeat, MathUtils, Quaternion, Vector3 } from 'three'
+import { AnimationMixer, Box3, DirectionalLight, Euler, Group, HemisphereLight, LoopRepeat, MathUtils, Quaternion, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import ARCard from '../components/ARCard.jsx'
 import styles from './AR.module.css'
 
 const DEFAULT_CONFIG_URL = '/demo-experience.json'
-const KNOWN_MINDAR_WARNING_PARTS = [
-  'already registered',
-  'Multiple instances of Three.js',
-  'Platform browser has already been set',
-]
-
-if (!window.__mindarWarningFilterInstalled) {
-  window.__mindarWarningFilterInstalled = true
-  const originalConsoleWarn = console.warn.bind(console)
-  console.warn = (...args) => {
-    const message = String(args[0] || '')
-    const isKnownMindARWarning = KNOWN_MINDAR_WARNING_PARTS.some((part) => message.includes(part))
-    if (!isKnownMindARWarning) originalConsoleWarn(...args)
-  }
-}
-
 function base64ToBlob(dataUrl) {
   const [header, b64] = dataUrl.split(',')
   const mime = header.match(/:(.*?);/)[1]
@@ -32,14 +15,10 @@ function base64ToBlob(dataUrl) {
   return new Blob([arr], { type: mime })
 }
 
-function arrayBufferToBase64(buffer) {
-  let binary = ''
-  const bytes = new Uint8Array(buffer)
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
-  return btoa(binary)
-}
-
 const COMPILE_MAX_IMAGE_SIZE = 1024
+const TARGET_CACHE_SCHEMA = 2
+const MINDAR_COMPILER_VERSION = '1.1.5'
+let mindARViewerPromise
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -73,6 +52,13 @@ async function resizeImageForCompile(img) {
 
 async function importMindARBundle(loader) {
   await loader()
+}
+
+function preloadMindARViewer() {
+  if (!mindARViewerPromise) {
+    mindARViewerPromise = importMindARBundle(() => import('mind-ar/dist/mindar-image-three.prod.js'))
+  }
+  return mindARViewerPromise
 }
 
 function getYoutubeVideoId(url) {
@@ -111,8 +97,8 @@ function validateExperience(exp, index) {
   if (!exp.videoUrl && !exp.youtubeUrl) {
     throw new Error(`Experience "${label}" must include videoUrl or youtubeUrl.`)
   }
-  if (!exp.mindDataUrl && !exp.targetImageUrl) {
-    throw new Error(`Experience "${label}" must include targetImageUrl or mindDataUrl.`)
+  if (!exp.mindTargetUrl && !exp.mindDataUrl && !exp.targetImageUrl) {
+    throw new Error(`Experience "${label}" must include targetImageUrl, mindTargetUrl, or mindDataUrl.`)
   }
   if (exp.youtubeUrl && !getYoutubeVideoId(exp.youtubeUrl)) {
     throw new Error(`Experience "${label}" has an invalid youtubeUrl.`)
@@ -385,7 +371,8 @@ async function createTargetMedia(exp) {
 // baking them into geometry would leave those node scales applied on top,
 // producing a wildly oversized, mispositioned model.
 // Returns { model, mixer } where mixer has all animations playing.
-function loadGlbModel(url) {
+async function loadGlbModel(url) {
+  const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js')
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader()
     loader.load(
@@ -436,7 +423,9 @@ function applyDisplay(setups, activeIndex, mode) {
     setup.cssObj.visible = isActive && !useModel
     if (setup.modelGroup) setup.modelGroup.visible = useModel
 
-    if (isActive && setup.media) {
+    if (!isActive && setup.media?.isPlaying) {
+      setup.media.pause()
+    } else if (isActive && setup.media) {
       if (useModel) setup.media.pause()
       else setup.media.play()
     }
@@ -483,19 +472,19 @@ export async function compileTargetImages(targetImageUrls, onProgress) {
     onProgress(Math.min(100, Math.round(normalized * 100)))
   })
   const buffer = await compiler.exportData()
-  return `data:application/octet-stream;base64,${arrayBufferToBase64(buffer)}`
+  return buffer
 }
 
 // ---------------------------------------------------------------------------
 // IndexedDB persistent cache for compiled AR mind targets.
 //
-// Cache key: the sorted, path-only filenames of target images joined by '|'.
+// Cache key: compiler/preprocessing identity plus the ordered target paths.
 // Using only the pathname (not the full origin) makes the key stable across
 // environments (web localhost vs Capacitor capacitor://localhost vs prod HTTPS).
 // ---------------------------------------------------------------------------
 
 const DB_NAME = 'AR_TARGETS_CACHE_DB'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'compiled_targets'
 
 function getDB() {
@@ -515,10 +504,10 @@ function getDB() {
 
 /**
  * Build a stable, environment-independent cache key from a list of target image URLs.
- * We strip the origin and query-string and sort so the key is identical on both
+ * We strip the origin and query-string so the key is identical on both
  * web (http://localhost:5173) and Android (capacitor://localhost).
  */
-export function buildStableCacheKey(targetImageUrls) {
+export function buildStableCacheKey(targetImageUrls, targetSetVersion = '') {
   const paths = targetImageUrls.map((url) => {
     try {
       const parsed = new URL(url, window.location.href)
@@ -528,8 +517,7 @@ export function buildStableCacheKey(targetImageUrls) {
       return url
     }
   })
-  // Sort so reordering targets in config doesn't bust the cache unnecessarily
-  return [...paths].sort().join('|')
+  return [TARGET_CACHE_SCHEMA, MINDAR_COMPILER_VERSION, COMPILE_MAX_IMAGE_SIZE, targetSetVersion, ...paths].join('|')
 }
 
 export async function getCachedTarget(key) {
@@ -587,6 +575,7 @@ export default function AR() {
   // Anchor setups are captured by the init effect; keep them in a ref so the
   // display-mode effect can re-apply visibility when the user toggles 2D/3D.
   const anchorSetupsRef = useRef([])
+  const loadActiveModelRef = useRef(null)
   // Mirror of `mode` state for use inside the non-React animation loop.
   const modeRef = useRef('2d')
 
@@ -600,6 +589,7 @@ export default function AR() {
   // Display mode for the active experience: '2d' shows the anchored video,
   // '3d' swaps in the GLB model when the experience configures one.
   const [mode, setMode] = useState('2d')
+  const [modelLoading, setModelLoading] = useState(false)
 
   // Keep the mode ref in sync so the animation loop arbiter reads fresh values.
   useEffect(() => {
@@ -616,6 +606,8 @@ export default function AR() {
 
     const loadConfig = async () => {
       try {
+        performance.mark('ar-config-start')
+        preloadMindARViewer()
         setStatus('loading')
         setLoadingText('Loading experience...')
         setCompileProgress(0)
@@ -627,47 +619,50 @@ export default function AR() {
 
         const experiences = normalizeExperiences(await response.json())
         experiences.forEach(validateExperience)
+        performance.mark('ar-config-ready')
 
-        let mindDataUrl = experiences[0].mindDataUrl
-        if (!mindDataUrl) {
+        let mindTargetSource = experiences[0].mindTargetUrl || experiences[0].mindDataUrl
+        if (!mindTargetSource) {
           const targetImageUrls = experiences.map((exp) => exp.targetImageUrl).filter(Boolean)
           if (!targetImageUrls.length) {
             throw new Error('At least one experience must include targetImageUrl or mindDataUrl.')
           }
 
           // Build a stable key that is identical across web + Capacitor environments
-          const cacheKey = buildStableCacheKey(targetImageUrls)
+          const targetSetVersion = experiences[0].targetSetVersion || ''
+          const cacheKey = buildStableCacheKey(targetImageUrls, targetSetVersion)
 
           // 1. In-memory cache (fastest — same JS session)
           if (window.__arCompiledCache && window.__arCompiledCache[cacheKey]) {
             console.log('[AR Cache] In-memory hit ✓')
-            mindDataUrl = window.__arCompiledCache[cacheKey]
+            mindTargetSource = window.__arCompiledCache[cacheKey]
           } else {
-            // 2. IndexedDB persistent cache (survives app restarts)
-            const cached = await getCachedTarget(cacheKey)
+            // Persist only versioned target sets. An unversioned URL can change
+            // without changing its cache key and must never reuse stale data.
+            const cached = targetSetVersion ? await getCachedTarget(cacheKey) : null
             if (cached) {
               console.log('[AR Cache] IndexedDB hit ✓')
-              mindDataUrl = cached
+              mindTargetSource = cached
               if (!window.__arCompiledCache) window.__arCompiledCache = {}
               window.__arCompiledCache[cacheKey] = cached
             } else {
               // 3. Cache miss — compile and store
               console.log('[AR Cache] Cache miss — compiling targets…')
               setLoadingText('Preparing AR targets...')
-              mindDataUrl = await compileTargetImages(targetImageUrls, (progress) => {
+              mindTargetSource = await compileTargetImages(targetImageUrls, (progress) => {
                 if (!cancelled) setCompileProgress(progress)
               })
               if (!window.__arCompiledCache) window.__arCompiledCache = {}
-              window.__arCompiledCache[cacheKey] = mindDataUrl
-              // Persist to IndexedDB asynchronously — don't block startup
-              setCachedTarget(cacheKey, mindDataUrl)
+              window.__arCompiledCache[cacheKey] = mindTargetSource
+              if (targetSetVersion) setCachedTarget(cacheKey, mindTargetSource)
             }
           }
         }
 
         if (!cancelled) {
           setLoadingText('Initialising camera...')
-          setConfig({ experiences, mindDataUrl })
+          performance.mark('ar-target-data-ready')
+          setConfig({ experiences, mindTargetSource })
         }
       } catch (err) {
         if (!cancelled) {
@@ -693,20 +688,27 @@ export default function AR() {
 
     const init = async () => {
       try {
-        await importMindARBundle(() => import('mind-ar/dist/mindar-image-three.prod.js'))
+        await preloadMindARViewer()
+        performance.mark('ar-viewer-module-ready')
         const MindARThree = window.MINDAR?.IMAGE?.MindARThree
         if (typeof MindARThree !== 'function') {
           throw new Error('MindAR viewer failed to load.')
         }
         if (cancelled) return
 
-        mindBlobUrl = URL.createObjectURL(base64ToBlob(config.mindDataUrl))
-
-        const targetCount = config.experiences.length
+        let imageTargetSrc = config.mindTargetSource
+        if (typeof imageTargetSrc === 'string' && imageTargetSrc.startsWith('data:')) {
+          mindBlobUrl = URL.createObjectURL(base64ToBlob(imageTargetSrc))
+          imageTargetSrc = mindBlobUrl
+        } else if (imageTargetSrc instanceof ArrayBuffer || ArrayBuffer.isView(imageTargetSrc)) {
+          const targetBytes = imageTargetSrc instanceof ArrayBuffer ? imageTargetSrc : imageTargetSrc.buffer
+          mindBlobUrl = URL.createObjectURL(new Blob([targetBytes], { type: 'application/octet-stream' }))
+          imageTargetSrc = mindBlobUrl
+        }
 
         mindarRef.current = new MindARThree({
           container: containerRef.current,
-          imageTargetSrc: mindBlobUrl,
+          imageTargetSrc,
           // Track at most one target at a time so overlapping detections from
           // images that share common elements can never play multiple videos.
           maxTrack: 1,
@@ -745,6 +747,10 @@ export default function AR() {
           if (!setup.mediaPromise) {
             setup.mediaPromise = createTargetMedia(setup.experience)
               .then((media) => {
+                if (cancelled) {
+                  media.destroy()
+                  return null
+                }
                 setup.media = media
                 setup.wrapper.appendChild(media.element)
                 mediaPlayersRef.current.push(media)
@@ -758,11 +764,38 @@ export default function AR() {
           return setup.mediaPromise
         }
 
+        const ensureModel = async (setup) => {
+          if (setup.modelGroup || !setup.experience.glbModelUrl) return setup.modelGroup
+          if (!setup.modelPromise) {
+            setup.modelPromise = loadGlbModel(setup.experience.glbModelUrl)
+              .then(({ model, mixer }) => {
+                if (cancelled) {
+                  disposeGlbModel(model)
+                  return null
+                }
+                const modelGroup = new Group()
+                modelGroup.add(model)
+                modelGroup.visible = false
+                modelGroup.position.copy(setup.modelCustomPosition)
+                modelGroup.rotation.copy(setup.modelCustomRotation)
+                scene.add(modelGroup)
+                setup.modelGroup = modelGroup
+                setup.modelMixer = mixer
+                return modelGroup
+              })
+              .catch((err) => {
+                setup.modelPromise = null
+                throw err
+              })
+          }
+          return setup.modelPromise
+        }
+
         for (let index = 0; index < config.experiences.length; index += 1) {
           const experience = config.experiences[index]
 
-          let targetAspect = 1
-          if (experience.targetImageUrl) {
+          let targetAspect = Number(experience.targetAspectRatio) || 1
+          if (!experience.targetAspectRatio && experience.targetImageUrl) {
             try {
               const targetImg = await loadImage(
                 new URL(experience.targetImageUrl, window.location.href).toString()
@@ -786,18 +819,6 @@ export default function AR() {
           // No pointer events needed on the CSS3D wrapper — taps go through the React overlay
           wrapper.style.pointerEvents = 'none'
 
-          let media = null
-          if (experience.youtubeUrl || experience.videoUrl) {
-            media = await createTargetMedia(experience)
-            if (cancelled) {
-              media.destroy()
-              mindarRef.current.stop()
-              return
-            }
-            wrapper.appendChild(media.element)
-            mediaPlayersRef.current.push(media)
-          }
-
           const cssObj = new CSS3DObject(wrapper)
           cssObj.scale.set(1 / pxScale, 1 / pxScale, 1 / pxScale)
           cssObj.position.set(0, 0, 0)
@@ -806,61 +827,26 @@ export default function AR() {
           const anchor = mindarRef.current.addAnchor(index)
           anchor.group.add(cssObj)
 
-          // Load the interactive 3D diagram if the experience configures one.
-          // The normalized model lives inside this wrapper group, which is
-          // placed in world space (scene root) each frame so the card's rotation
-          // cannot tilt it — see updateModelTransforms. Using position/scale on
-          // the wrapper keeps the model's own node-scale normalization intact.
-          let modelGroup = null
-          let modelMixer = null
-          let modelCustomRotation = null
-          let modelCustomPosition = null
-          let modelCustomScale = 1
-          if (experience.glbModelUrl) {
-            try {
-              const { model, mixer } = await loadGlbModel(experience.glbModelUrl)
-              if (cancelled) {
-                disposeGlbModel(model)
-                mindarRef.current.stop()
-                return
-              }
-              modelGroup = new Group()
-              modelGroup.add(model)
-              modelGroup.visible = false
-              scene.add(modelGroup)
-              modelMixer = mixer
-
-              // Apply custom position, rotation (degrees -> radians), and scale
-              // from config. Scale is a percentage change: 80 -> 1.8x, -110 -> -0.1x.
-              const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
-              const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
-              const scalePct = experience.modelScale != null ? experience.modelScale : 0
-              modelCustomRotation = new Euler(
-                MathUtils.degToRad(rot.x),
-                MathUtils.degToRad(rot.y),
-                MathUtils.degToRad(rot.z)
-              )
-              modelCustomPosition = new Vector3(pos.x, pos.y, pos.z)
-              modelCustomScale = 1 + scalePct / 100
-              modelGroup.position.copy(modelCustomPosition)
-              modelGroup.rotation.copy(modelCustomRotation)
-            } catch (err) {
-              console.warn('GLB model failed to load', experience.glbModelUrl, err)
-              modelGroup = null
-            }
-          }
+          const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
+          const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
+          const scalePct = experience.modelScale != null ? experience.modelScale : 0
 
           const setup = {
             experience,
             wrapper,
             cssObj,
-            media,
+            media: null,
             mediaPromise: null,
-            modelGroup,
-            modelMixer,
-            modelCustomRotation,
-            modelCustomPosition,
-            modelCustomScale,
+            modelGroup: null,
+            modelMixer: null,
+            modelPromise: null,
+            modelCustomRotation: new Euler(
+              MathUtils.degToRad(rot.x),
+              MathUtils.degToRad(rot.y),
+              MathUtils.degToRad(rot.z)
+            ),
+            modelCustomPosition: new Vector3(pos.x, pos.y, pos.z),
+            modelCustomScale: 1 + scalePct / 100,
             anchor,
           }
           anchorSetups.push(setup)
@@ -882,16 +868,31 @@ export default function AR() {
 
         await mindarRef.current.start()
         if (cancelled) { mindarRef.current.stop(); return }
+        performance.mark('ar-scanner-ready')
+        performance.measure('ar-time-to-scanner', 'ar-config-start', 'ar-scanner-ready')
 
         // Expose the built setups to the mode-toggle effect and cleanup.
         anchorSetupsRef.current = anchorSetups
+        loadActiveModelRef.current = async () => {
+          const activeIndex = arbiterRef.current.activeIndex
+          const setup = anchorSetups[activeIndex]
+          if (!setup?.experience.glbModelUrl) return
+          setModelLoading(true)
+          try {
+            await ensureModel(setup)
+            if (!cancelled && arbiterRef.current.activeIndex === activeIndex) {
+              applyDisplay(anchorSetups, activeIndex, modeRef.current)
+            }
+          } catch (err) {
+            console.warn('GLB model failed to load', setup.experience.glbModelUrl, err)
+            modeRef.current = '2d'
+            setMode('2d')
+          } finally {
+            if (!cancelled) setModelLoading(false)
+          }
+        }
 
         setStatus('ready')
-
-        // Preload all media after the camera is running.
-        anchorSetups.forEach((setup) => {
-          ensureMedia(setup).catch(() => {})
-        })
 
         // ------------------------------------------------------------------
         // Single-active-target arbiter. Runs every frame from MindAR's live
@@ -916,12 +917,8 @@ export default function AR() {
               activeMediaRef.current = null
               setActiveExperience(null)
               setTracked(false)
+              applyDisplay(anchorSetups, -1, modeRef.current)
             }
-            anchorSetups.forEach((setup) => {
-              if (setup.cssObj.visible) setup.cssObj.visible = false
-              if (setup.modelGroup?.visible) setup.modelGroup.visible = false
-              setup.media?.pause()
-            })
             return
           }
 
@@ -947,6 +944,8 @@ export default function AR() {
             }
 
             arbiterRef.current.activeIndex = activeIndex
+            modeRef.current = '2d'
+            setMode('2d')
             applyDisplay(anchorSetups, activeIndex, modeRef.current)
 
             const setup = anchorSetups[activeIndex]
@@ -978,9 +977,10 @@ export default function AR() {
         const modelOffset = new Vector3()
         const anchorQuat = new Quaternion()
         const updateModelTransforms = () => {
+          const activeIndex = arbiterRef.current.activeIndex
           for (let i = 0; i < anchorSetups.length; i += 1) {
             const setup = anchorSetups[i]
-            if (!setup.modelGroup) continue
+            if (i !== activeIndex || !setup.modelGroup?.visible) continue
             const anchorGroup = setup.anchor.group
             const anchorMatrix = anchorGroup.matrix
             modelPos.setFromMatrixPosition(anchorMatrix)
@@ -1017,11 +1017,9 @@ export default function AR() {
           updateModelTransforms()
 
           // Update animation mixers
-          for (let i = 0; i < anchorSetups.length; i += 1) {
-            const setup = anchorSetups[i]
-            if (setup.modelMixer) {
-              setup.modelMixer.update(delta)
-            }
+          const activeSetup = anchorSetups[arbiterRef.current.activeIndex]
+          if (activeSetup?.modelMixer && activeSetup.modelGroup?.visible) {
+            activeSetup.modelMixer.update(delta)
           }
 
           renderer.render(scene, camera)
@@ -1053,6 +1051,7 @@ export default function AR() {
     return () => {
       cancelled = true
       activeMediaRef.current = null
+      loadActiveModelRef.current = null
       arbiterRef.current.activeIndex = -1
       if (resizeObserverRef.current) {
         resizeObserverRef.current.disconnect()
@@ -1076,7 +1075,12 @@ export default function AR() {
       })
       anchorSetupsRef.current = []
       if (mindarRef.current) {
+        try { mindarRef.current.renderer?.setAnimationLoop(null) } catch (_) {}
+        try { mindarRef.current.video?.srcObject?.getTracks().forEach((track) => track.stop()) } catch (_) {}
         try { mindarRef.current.stop() } catch (_) {}
+        try { mindarRef.current.renderer?.dispose() } catch (_) {}
+        try { mindarRef.current.renderer?.domElement?.remove() } catch (_) {}
+        try { mindarRef.current.cssRenderer?.domElement?.remove() } catch (_) {}
         mindarRef.current = null
       }
       if (mindBlobUrl) URL.revokeObjectURL(mindBlobUrl)
@@ -1089,6 +1093,12 @@ export default function AR() {
     if (activeMediaRef.current) {
       activeMediaRef.current.toggle()
     }
+  }, [])
+
+  const handleModeChange = useCallback((nextMode) => {
+    modeRef.current = nextMode
+    setMode(nextMode)
+    if (nextMode === '3d') loadActiveModelRef.current?.()
   }, [])
 
   return (
@@ -1142,7 +1152,13 @@ export default function AR() {
       )}
 
       {status === 'ready' && activeExperience && (
-        <ARCard config={activeExperience} visible={tracked} mode={mode} onToggleMode={setMode} />
+        <ARCard
+          config={activeExperience}
+          visible={tracked}
+          mode={mode}
+          modelLoading={modelLoading}
+          onToggleMode={handleModeChange}
+        />
       )}
     </div>
   )

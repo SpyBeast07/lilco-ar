@@ -1,6 +1,9 @@
 [
   {
     "targetImageUrl": "/Chemical Bonding & Molecular Orbital.png",
+    "mindTargetUrl": "/demo-experience.mind",
+    "targetSetVersion": "mindar-1.1.5-169f08e74883e007",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/j67uvRFzGOk?feature=share",
     "glbModelUrl": "/chemical_bonding.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -13,6 +16,7 @@
   },
   {
     "targetImageUrl": "/Double Pendulum.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/K03Anklea_o?feature=share",
     "glbModelUrl": "/double_pendulum.glb",
     "modelPosition": { "x": 400, "y": 0, "z": 0 },
@@ -25,6 +29,7 @@
   },
   {
     "targetImageUrl": "/Wave Particle Duality.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/QDZlnmsxwiU?feature=share",
     "glbModelUrl": "/wave_particle.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -37,6 +42,7 @@
   },
   {
     "targetImageUrl": "/General Relativity Concept.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/70rXS6dDfDk?feature=share",
     "modelScale": 0,
     "cardTitle": "General Relativity Concept",
@@ -46,6 +52,7 @@
   },
   {
     "targetImageUrl": "/Photoelectric Effect.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/jXMRmQla-GE?feature=share",
     "glbModelUrl": "/photoelectric1.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -58,6 +65,7 @@
   },
   {
     "targetImageUrl": "/Laplace Demon.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/TXG1KhCb8wA?feature=share",
     "glbModelUrl": "/laplace_demon.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -70,6 +78,7 @@
   },
   {
     "targetImageUrl": "/Konigsberg Bridge.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/S76P5MigK2M?feature=share",
     "glbModelUrl": "/konigsberg_bridge.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -82,6 +91,7 @@
   },
   {
     "targetImageUrl": "/Maxwell's Demon.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtu.be/avI71WYP08k",
     "glbModelUrl": "/maxwell_demon.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -94,6 +104,7 @@
   },
   {
     "targetImageUrl": "/Quantum Constellation.png",
+    "targetAspectRatio": 1.40969163,
     "youtubeUrl": "https://youtube.com/shorts/Bw38jYBLAmE?feature=share",
     "glbModelUrl": "/quantum_constellation.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -106,6 +117,7 @@
   },
   {
     "targetImageUrl": "/Principal of Conservation of Momentum.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtube.com/shorts/KhDjo6rLF30?feature=share",
     "glbModelUrl": "/momentum_conservation.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -118,6 +130,7 @@
   },
   {
     "targetImageUrl": "/Grime Dice.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://youtu.be/u4XNL-uo520?si=xWhn1u9-_6W__28S",
     "glbModelUrl": "/grime_dice.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },
@@ -130,6 +143,7 @@
   },
   {
     "targetImageUrl": "/Conway's Game of Life.png",
+    "targetAspectRatio": 1.40967742,
     "youtubeUrl": "https://www.youtube.com/watch?v=Hf729KBYN10",
     "glbModelUrl": "/Conway_life.glb",
     "modelPosition": { "x": 0, "y": 0, "z": 0 },

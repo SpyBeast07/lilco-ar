@@ -346,56 +346,6 @@
   animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.heroBadges {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-  flex-wrap: wrap;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--accent-subtle);
-  border: 1px solid rgba(249, 115, 22, 0.25);
-  color: var(--accent-light);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 6px 14px;
-  border-radius: 100px;
-}
-
-.badgeCompiling {
-  background: rgba(217, 119, 6, 0.1);
-  border-color: rgba(217, 119, 6, 0.3);
-  color: var(--amber);
-}
-
-.badgeReady {
-  background: rgba(5, 150, 105, 0.1);
-  border-color: rgba(5, 150, 105, 0.3);
-  color: var(--green);
-}
-
-.badgeError {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.3);
-  color: var(--red);
-}
-
-.statusPulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: pulse 1.5s ease infinite;
-}
-
 .title {
   font-size: clamp(30px, 5.2vw, 50px);
   font-weight: 900;
@@ -449,20 +399,8 @@
   box-shadow: 0 14px 35px rgba(249, 115, 22, 0.4);
 }
 
-.ctaButton:disabled:hover {
-  background: var(--accent);
-  transform: none;
-  box-shadow: 0 10px 25px var(--accent-glow);
-}
-
 .ctaButton:active {
   transform: translateY(0) scale(0.98);
-}
-
-.ctaButton:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
 .ctaArrow {
@@ -528,4 +466,3 @@
     padding-bottom: clamp(40px, 8vh, 64px);
   }
 }
-
