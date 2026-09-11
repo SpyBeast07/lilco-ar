@@ -59,7 +59,10 @@
   {
     "targetImageUrl": "/Laplace Demon.png",
     "youtubeUrl": "https://youtube.com/shorts/TXG1KhCb8wA?feature=share",
-    "modelScale": 0,
+    "glbModelUrl": "/laplace_demon.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
+    "modelScale": 40,
     "cardTitle": "Laplace Demon",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Watch Tedx Talks Video",
