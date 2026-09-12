@@ -38,11 +38,14 @@
   {
     "targetImageUrl": "/General Relativity Concept.png",
     "youtubeUrl": "https://youtube.com/shorts/70rXS6dDfDk?feature=share",
-    "modelScale": 0,
+    "glbModelUrl": "/general_relativity.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 5, "y": 40, "z": 0 },
+    "modelScale": 40,
     "cardTitle": "General Relativity Concept",
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Watch MIT OpenCourseware Video",
-    "buttonUrl": "https://youtu.be/bFGiQEEvh18?si=Z6yVROHebp07ar-J"
+    "buttonUrl": "https://youtu.be/bFGiQEEvh18?si=X5jpQzJ7Q1vIZLcm&t=2052"
   },
   {
     "targetImageUrl": "/Photoelectric Effect.png",
@@ -115,6 +118,16 @@
     "cardBody": "This AR experience is loaded from backend-style JSON.",
     "buttonLabel": "Watch MIT OpenCourseware Video",
     "buttonUrl": "https://youtu.be/1GvCIlHihEA?si=B24trae7vpwE1F_l"
+  },
+  {
+    "targetImageUrl": "/Schrodinger's Cat.png",
+    "youtubeUrl": "https://youtube.com/shorts/nXWW2XpZWMM",
+    "glbModelUrl": "/schrondiger_cat.glb",
+    "modelPosition": { "x": 0, "y": 0, "z": 0 },
+    "modelRotation": { "x": 0, "y": 0, "z": 0 },
+    "modelScale": 50,
+    "cardTitle": "Schrodinger's Cat",
+    "cardBody": "This AR experience is loaded from backend-style JSON."
   },
   {
     "targetImageUrl": "/Grime Dice.png",
