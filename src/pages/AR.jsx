@@ -713,7 +713,7 @@ export default function AR() {
           // Require a target to be tracked steadily across several frames before
           // it is shown. Partial/spurious matches (shared elements) flicker and
           // drop out, while the real, persistent match surfaces as the winner.
-          warmupTolerance: 8,
+          warmupTolerance: 18,
           missTolerance: 5,
           uiLoading: 'no',
           uiScanning: 'no',
