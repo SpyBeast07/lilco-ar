@@ -139,7 +139,9 @@
     "modelRotation": { "x": 0, "y": 0, "z": 0 },
     "modelScale": 50,
     "cardTitle": "Schrodinger's Cat",
-    "cardBody": "This AR experience is loaded from backend-style JSON."
+    "cardBody": "This AR experience is loaded from backend-style JSON.",
+    "buttonLabel": "Check Research Paper",
+    "buttonUrl": "https://ar.lilco.eu/SchrodingerCatPDF.pdf"
   },
   {
     "targetImageUrl": "/Grime Dice.png",
