@@ -589,6 +589,9 @@ export default function AR() {
   const anchorSetupsRef = useRef([])
   // Mirror of `mode` state for use inside the non-React animation loop.
   const modeRef = useRef('2d')
+  // Lets the mode-toggle effect kick off on-demand GLB loading for the
+  // currently tracked target (ensureGlb lives inside the init effect scope).
+  const loadActiveModelRef = useRef(null)
 
   const [config, setConfig] = useState(null)
   const [activeExperience, setActiveExperience] = useState(null)
@@ -608,6 +611,9 @@ export default function AR() {
     if (!setups.length) return
     // Re-apply visibility/playback without changing which target is active.
     applyDisplay(setups, arbiterRef.current.activeIndex, mode)
+    // Switching to 3D may demand a diagram that hasn't been loaded yet —
+    // kick off its on-demand fetch and re-apply display once it's ready.
+    if (mode === '3d') loadActiveModelRef.current?.()
   }, [mode])
 
   // Effect 1: load config from backend endpoint and compile target image if needed.
@@ -702,8 +708,6 @@ export default function AR() {
 
         mindBlobUrl = URL.createObjectURL(base64ToBlob(config.mindDataUrl))
 
-        const targetCount = config.experiences.length
-
         mindarRef.current = new MindARThree({
           container: containerRef.current,
           imageTargetSrc: mindBlobUrl,
@@ -731,6 +735,9 @@ export default function AR() {
         // it renders black. MindAR's scene starts dark, so add lights here.
         // Render in sRGB so glTF linear-space base colors come out correct.
         renderer.outputEncoding = 3001 // THREE.sRGBEncoding
+        // Cap the render buffer on high-DPR phones — full-resolution rendering
+        // of the camera feed + WebGL scene is a top mobile memory/GPU hog.
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
         const hemiLight = new HemisphereLight(0xffffff, 0x404040, 1.1)
         const dirLight = new DirectionalLight(0xffffff, 1.6)
         dirLight.position.set(4, 8, 6)
@@ -758,6 +765,62 @@ export default function AR() {
           return setup.mediaPromise
         }
 
+        // Loads a target's 3D diagram on demand, the first time that target is
+        // tracked in 3D mode. The normalized model lives inside this wrapper
+        // group, which is placed in world space (scene root) each frame so the
+        // card's rotation cannot tilt it — see updateModelTransforms. Using
+        // position/scale on the wrapper keeps the model's own node-scale
+        // normalization intact. The call always resolves (null on failure) and
+        // is memoized per setup via glbPromise / modelGroup.
+        const ensureGlb = async (setup) => {
+          if (setup.modelGroup) return setup.modelGroup
+          if (setup.glbPromise) return setup.glbPromise
+          const experience = setup.experience
+          setup.glbPromise = loadGlbModel(experience.glbModelUrl)
+            .then(({ model, mixer }) => {
+              if (cancelled) {
+                disposeGlbModel(model)
+                return null
+              }
+              const group = new Group()
+              group.add(model)
+              group.visible = false
+              scene.add(group)
+              // Apply custom position and rotation (degrees already converted
+              // to radians at setup time).
+              group.position.copy(setup.modelCustomPosition)
+              group.rotation.copy(setup.modelCustomRotation)
+              setup.modelGroup = group
+              setup.modelMixer = mixer
+              return group
+            })
+            .catch((err) => {
+              console.warn('GLB model failed to load', experience.glbModelUrl, err)
+              setup.glbPromise = null
+              return null
+            })
+          return setup.glbPromise
+        }
+
+        // Releases a target's loaded diagram so GPU memory stays flat while the
+        // user scans different cards.
+        const disposeModel = (setup) => {
+          if (setup.modelGroup) {
+            try {
+              setup.modelGroup.parent?.remove(setup.modelGroup)
+              disposeGlbModel(setup.modelGroup)
+            } catch (_) {}
+            setup.modelGroup = null
+          }
+          if (setup.modelMixer) {
+            try {
+              setup.modelMixer.stopAllAction()
+              setup.modelMixer.uncacheRoot(setup.modelMixer.getRoot())
+            } catch (_) {}
+            setup.modelMixer = null
+          }
+        }
+
         for (let index = 0; index < config.experiences.length; index += 1) {
           const experience = config.experiences[index]
 
@@ -767,6 +830,7 @@ export default function AR() {
               const targetImg = await loadImage(
                 new URL(experience.targetImageUrl, window.location.href).toString()
               )
+              if (cancelled) return
               targetAspect = targetImg.naturalWidth / targetImg.naturalHeight
             } catch (_) {
               // fallback to 1:1
@@ -786,18 +850,6 @@ export default function AR() {
           // No pointer events needed on the CSS3D wrapper — taps go through the React overlay
           wrapper.style.pointerEvents = 'none'
 
-          let media = null
-          if (experience.youtubeUrl || experience.videoUrl) {
-            media = await createTargetMedia(experience)
-            if (cancelled) {
-              media.destroy()
-              mindarRef.current.stop()
-              return
-            }
-            wrapper.appendChild(media.element)
-            mediaPlayersRef.current.push(media)
-          }
-
           const cssObj = new CSS3DObject(wrapper)
           cssObj.scale.set(1 / pxScale, 1 / pxScale, 1 / pxScale)
           cssObj.position.set(0, 0, 0)
@@ -806,58 +858,29 @@ export default function AR() {
           const anchor = mindarRef.current.addAnchor(index)
           anchor.group.add(cssObj)
 
-          // Load the interactive 3D diagram if the experience configures one.
-          // The normalized model lives inside this wrapper group, which is
-          // placed in world space (scene root) each frame so the card's rotation
-          // cannot tilt it — see updateModelTransforms. Using position/scale on
-          // the wrapper keeps the model's own node-scale normalization intact.
-          let modelGroup = null
-          let modelMixer = null
-          let modelCustomRotation = null
-          let modelCustomPosition = null
-          let modelCustomScale = 1
-          if (experience.glbModelUrl) {
-            try {
-              const { model, mixer } = await loadGlbModel(experience.glbModelUrl)
-              if (cancelled) {
-                disposeGlbModel(model)
-                mindarRef.current.stop()
-                return
-              }
-              modelGroup = new Group()
-              modelGroup.add(model)
-              modelGroup.visible = false
-              scene.add(modelGroup)
-              modelMixer = mixer
-
-              // Apply custom position, rotation (degrees -> radians), and scale
-              // from config. Scale is a percentage change: 80 -> 1.8x, -110 -> -0.1x.
-              const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
-              const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
-              const scalePct = experience.modelScale != null ? experience.modelScale : 0
-              modelCustomRotation = new Euler(
-                MathUtils.degToRad(rot.x),
-                MathUtils.degToRad(rot.y),
-                MathUtils.degToRad(rot.z)
-              )
-              modelCustomPosition = new Vector3(pos.x, pos.y, pos.z)
-              modelCustomScale = 1 + scalePct / 100
-              modelGroup.position.copy(modelCustomPosition)
-              modelGroup.rotation.copy(modelCustomRotation)
-            } catch (err) {
-              console.warn('GLB model failed to load', experience.glbModelUrl, err)
-              modelGroup = null
-            }
-          }
+          // Compute the diagram's config-driven transform once; it is applied
+          // when (and if) the GLB is loaded on demand. Scale is a percentage
+          // change: 80 -> 1.8x, -110 -> -0.1x.
+          const pos = experience.modelPosition || { x: 0, y: 0, z: 0 }
+          const rot = experience.modelRotation || { x: 0, y: 0, z: 0 }
+          const scalePct = experience.modelScale != null ? experience.modelScale : 0
+          const modelCustomRotation = new Euler(
+            MathUtils.degToRad(rot.x),
+            MathUtils.degToRad(rot.y),
+            MathUtils.degToRad(rot.z)
+          )
+          const modelCustomPosition = new Vector3(pos.x, pos.y, pos.z)
+          const modelCustomScale = 1 + scalePct / 100
 
           const setup = {
             experience,
             wrapper,
             cssObj,
-            media,
+            media: null,
             mediaPromise: null,
-            modelGroup,
-            modelMixer,
+            modelGroup: null,
+            modelMixer: null,
+            glbPromise: null,
             modelCustomRotation,
             modelCustomPosition,
             modelCustomScale,
@@ -865,14 +888,24 @@ export default function AR() {
           }
           anchorSetups.push(setup)
 
-          // Visibility and playback are decided by the per-frame arbiter in the
-          // animation loop, not by these events. The events are only used to
-          // kick off media preparation so the arbiter never has to block.
+          // Media and the 3D diagram are created lazily (see ensureMedia /
+          // ensureGlb) the first time the target is actually tracked. Only the
+          // card the user is currently looking at ever holds a video player or
+          // a loaded model, so mobile memory and GPU usage stay flat no matter
+          // how many experiences the config contains. Visibility and playback
+          // are decided by the per-frame arbiter below.
           anchor.onTargetFound = () => {
             if (cancelled) return
             ensureMedia(setup).catch((err) => {
               console.warn('Media failed to load for target', setup.experience.targetImageUrl, err)
             })
+            if (modeRef.current === '3d' && experience.glbModelUrl) {
+              ensureGlb(setup).then(() => {
+                if (!cancelled && arbiterRef.current.activeIndex === index) {
+                  applyDisplay(anchorSetups, arbiterRef.current.activeIndex, modeRef.current)
+                }
+              })
+            }
           }
           anchor.onTargetLost = () => {
             // No-op: the arbiter owns active state, so a "lost" event for one
@@ -886,12 +919,20 @@ export default function AR() {
         // Expose the built setups to the mode-toggle effect and cleanup.
         anchorSetupsRef.current = anchorSetups
 
-        setStatus('ready')
+        // Expose on-demand model loading so the mode-toggle effect can request
+        // a diagram for the currently tracked target.
+        loadActiveModelRef.current = () => {
+          const index = arbiterRef.current.activeIndex
+          if (index === -1) return
+          const setup = anchorSetups[index]
+          if (!setup || !setup.experience.glbModelUrl || setup.modelGroup) return
+          ensureGlb(setup).then(() => {
+            if (cancelled || arbiterRef.current.activeIndex !== index) return
+            applyDisplay(anchorSetups, index, modeRef.current)
+          })
+        }
 
-        // Preload all media after the camera is running.
-        anchorSetups.forEach((setup) => {
-          ensureMedia(setup).catch(() => {})
-        })
+        setStatus('ready')
 
         // ------------------------------------------------------------------
         // Single-active-target arbiter. Runs every frame from MindAR's live
@@ -912,6 +953,7 @@ export default function AR() {
 
           if (showing.length === 0) {
             if (arbiterRef.current.activeIndex !== -1) {
+              disposeModel(anchorSetups[arbiterRef.current.activeIndex])
               arbiterRef.current.activeIndex = -1
               activeMediaRef.current = null
               setActiveExperience(null)
@@ -944,6 +986,7 @@ export default function AR() {
               const prevSetup = anchorSetups[prev]
               prevSetup.cssObj.visible = false
               prevSetup.media?.pause()
+              disposeModel(prevSetup)
             }
 
             arbiterRef.current.activeIndex = activeIndex
@@ -965,6 +1008,16 @@ export default function AR() {
                   }
                 })
                 .catch(() => {})
+            }
+
+            // Lazy 3D diagram — in 3D mode a freshly-tracked card needs its GLB
+            // fetched on demand; re-apply display once it arrives.
+            if (modeRef.current === '3d' && setup.experience.glbModelUrl) {
+              ensureGlb(setup).then(() => {
+                if (!cancelled && arbiterRef.current.activeIndex === activeIndex) {
+                  applyDisplay(anchorSetups, activeIndex, modeRef.current)
+                }
+              })
             }
           }
         }
@@ -1054,6 +1107,7 @@ export default function AR() {
       cancelled = true
       activeMediaRef.current = null
       arbiterRef.current.activeIndex = -1
+      loadActiveModelRef.current = null
       if (resizeObserverRef.current) {
         resizeObserverRef.current.disconnect()
         resizeObserverRef.current = null
