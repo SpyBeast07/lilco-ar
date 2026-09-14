@@ -735,9 +735,6 @@ export default function AR() {
         // it renders black. MindAR's scene starts dark, so add lights here.
         // Render in sRGB so glTF linear-space base colors come out correct.
         renderer.outputEncoding = 3001 // THREE.sRGBEncoding
-        // Cap the render buffer on high-DPR phones — full-resolution rendering
-        // of the camera feed + WebGL scene is a top mobile memory/GPU hog.
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
         const hemiLight = new HemisphereLight(0xffffff, 0x404040, 1.1)
         const dirLight = new DirectionalLight(0xffffff, 1.6)
         dirLight.position.set(4, 8, 6)
@@ -803,7 +800,9 @@ export default function AR() {
         }
 
         // Releases a target's loaded diagram so GPU memory stays flat while the
-        // user scans different cards.
+        // user scans different cards. glbPromise is reset too so a re-detected
+        // target genuinely re-loads its diagram instead of resurrecting the
+        // already-disposed group.
         const disposeModel = (setup) => {
           if (setup.modelGroup) {
             try {
@@ -819,6 +818,7 @@ export default function AR() {
             } catch (_) {}
             setup.modelMixer = null
           }
+          setup.glbPromise = null
         }
 
         for (let index = 0; index < config.experiences.length; index += 1) {
@@ -888,24 +888,16 @@ export default function AR() {
           }
           anchorSetups.push(setup)
 
-          // Media and the 3D diagram are created lazily (see ensureMedia /
-          // ensureGlb) the first time the target is actually tracked. Only the
-          // card the user is currently looking at ever holds a video player or
-          // a loaded model, so mobile memory and GPU usage stay flat no matter
-          // how many experiences the config contains. Visibility and playback
-          // are decided by the per-frame arbiter below.
+          // All detection anchors are registered here in a single pass so the
+          // tracker sees every card from the start (identical to the original
+          // startup path). Media and the 3D diagram are deliberately NOT built
+          // now: creating a player/iframe during the warmup frames would jank
+          // the main thread and degrade tracking, exactly when detection must
+          // stabilize. The arbiter creates them only after a target is
+          // confirmed active (warmup passed), and cleanup keeps GPU memory flat
+          // as the user scans different cards.
           anchor.onTargetFound = () => {
-            if (cancelled) return
-            ensureMedia(setup).catch((err) => {
-              console.warn('Media failed to load for target', setup.experience.targetImageUrl, err)
-            })
-            if (modeRef.current === '3d' && experience.glbModelUrl) {
-              ensureGlb(setup).then(() => {
-                if (!cancelled && arbiterRef.current.activeIndex === index) {
-                  applyDisplay(anchorSetups, arbiterRef.current.activeIndex, modeRef.current)
-                }
-              })
-            }
+            // No-op — all lazy creation happens in the arbiter, post-detection.
           }
           anchor.onTargetLost = () => {
             // No-op: the arbiter owns active state, so a "lost" event for one
