@@ -714,6 +714,13 @@ export default function AR() {
           // Track at most one target at a time so overlapping detections from
           // images that share common elements can never play multiple videos.
           maxTrack: 1,
+          // Minimum fraction of a target's keypoints that must actually match
+          // before MindAR accepts it as detected. The default (0.001) is far too
+          // lax for cards that share a common template/logo, so a shared-element
+          // card (e.g. Chemical Bonding) falsely locks on any other card. Raising
+          // it demands a strong feature consensus — no extra CPU, just a stricter
+          // acceptance gate. A real card held in view still passes easily.
+          filterMinCF: 0.8,
           // Require a target to be tracked steadily across several frames before
           // it is shown. Partial/spurious matches (shared elements) flicker and
           // drop out, while the real, persistent match surfaces as the winner.
