@@ -27,11 +27,6 @@ export default function ARCard({ config, visible, mode = '2d', onToggleMode }) {
       <div className={styles.card}>
         <div className={styles.pill} />
 
-        <div className={styles.scanIndicator}>
-          <span className={styles.dot} />
-          <span className={styles.scanLabel}>Image tracked</span>
-        </div>
-
         <h3 className={styles.title}>{config.cardTitle}</h3>
         {config.cardBody && <p className={styles.body}>{config.cardBody}</p>}
 
