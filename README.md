@@ -48,6 +48,12 @@ This application adopts the official **LilCo Signature Orange and Crisp White/Da
 
 ---
 
+# Architecture Diagram
+
+![Architecture Diagram](images/archDiagram.png)
+
+---
+
 ## 📁 Routes
 
 | Route | Description |
